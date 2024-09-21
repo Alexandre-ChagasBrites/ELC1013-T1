@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 public class Lexer
 {
@@ -6,26 +7,37 @@ public class Lexer
     {
         None,
         Text,
-        BegNode,
-        EndNode,
+        Atomic,
+        Not,
+        If,
+        Then,
+        End,
         Stop
     }
-    
+
     public struct Token
     {
         public TokenType type;
         // Todo: Substituir por ReadOnlySpan<char>
         public string lexeme;
     }
-    
-    public static Token ReadToken(string src, ref int index)
+
+    private string src;
+    private int index = 0;
+
+    public Lexer(string src)
+    {
+        this.src = src;
+    }
+
+    public Token ReadToken()
     {
         if (index >= src.Length)
-        return new Token(){ type=TokenType.None };
-        
+            return new Token() { type = TokenType.None };
+
         TokenType type = TokenType.Text;
         int start = index;
-        
+
         if (src[index] == '\n')
         {
             type = TokenType.Stop;
@@ -33,7 +45,7 @@ public class Lexer
         }
         else if (src[index] == '}')
         {
-            type = TokenType.EndNode;
+            type = TokenType.End;
             index++;
         }
         else
@@ -42,40 +54,35 @@ public class Lexer
             while (index < src.Length && src[index] != '{' && src[index] != '}' && src[index] != '\n')
                 index++;
             // Depois que é lido até o '{' é preciso identificar
-            // se o token é um BegNode recuando o index
+            // se o token é do tipo Text recuando o index
             if (index < src.Length && src[index] == '{')
             {
                 int tmp = index;
                 while (tmp > start && !Char.IsWhiteSpace(src[tmp]))
                     tmp--;
                 // Se for encontrado um WhiteSpace após o
-                // recuo então o token não é do tipo BegNode 
+                // recuo então o token é do tipo Text 
                 if (Char.IsWhiteSpace(src[tmp]))
                     index = tmp + 1;
                 else
                 {
-                    type = TokenType.BegNode;
+                    type = GetTokenType(src.Substring(start, index - start));
                     index++;
                 }
             }
         }
-        
-        return new Token(){ type=type, lexeme=src.Substring(start, index - start) };
+
+        return new Token() { type = type, lexeme = src.Substring(start, index - start) };
     }
-    
-    public static void Main(string[] args)
+
+    private TokenType GetTokenType(string lexeme)
     {
-        string src = @"if{Se p{o time joga bem}}, then{q{ganha o campeonato}}.
-            if{Se o time not{não p{joga bem}}}, then{r{o técnico é culpado}}.
-            if{Se q{o time ganha o campeonato}}, then{s{os torcedores ficam contentes}}.
-            Os torcedores not{não s{estão contentes}}.
-            Logo, r{o técnico é culpado}.";
-        
-        int index = 0;
-        while (index < src.Length)
+        return lexeme switch
         {
-            Token token = ReadToken(src, ref index);
-            Console.WriteLine($"{token.type} \"{token.lexeme}\"");
-        }
+            "not" => TokenType.Not,
+            "if" => TokenType.If,
+            "then" => TokenType.Then,
+            _ => TokenType.Atomic,
+        };
     }
 }
