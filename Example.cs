@@ -9,9 +9,9 @@ public class Example
     public static void Main()
     {
         string src = """
-            if{Se p{o time joga bem}}, then{q{ganha o campeonato}}.
-            if{Se o time not{não p{joga bem}}}, then{r{o técnico é culpado}}.
-            if{Se q{o time ganha o campeonato}}, then{s{os torcedores ficam contentes}}.
+            ifthen{Se p{o time joga bem}, q{ganha o campeonato}}.
+            ifthen{Se o time not{não p{joga bem}}, r{o técnico é culpado}}.
+            ifthen{Se q{o time ganha o campeonato}, s{os torcedores ficam contentes}}.
             Os torcedores not{não s{estão contentes}}.
             Logo, r{o técnico é culpado}.
             """;
@@ -25,12 +25,14 @@ public class Example
             Console.WriteLine($"Atomic: {atomic}");
         }
 
-        foreach (Parser.PremiseNode node in parser.Nodes)
+        foreach (Parser.PropositionNode node in parser.Propositions)
         {
             node.Print();
             Console.Write(" ");
             node.PrintProposition();
             Console.WriteLine();
         }
+
+        // Todo: Resultado em HTML
     }
 }

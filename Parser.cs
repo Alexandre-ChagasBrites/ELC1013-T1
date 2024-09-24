@@ -53,7 +53,7 @@ class Parser
         }
     }
 
-    public enum UnaryType
+    public enum UnaryOperator
     {
         None,
         Not
@@ -61,7 +61,7 @@ class Parser
 
     public class UnaryNode : PropositionNode
     {
-        public UnaryType type;
+        public UnaryOperator type;
         public PropositionNode node;
 
         public override void PrintProposition()
@@ -71,15 +71,18 @@ class Parser
         }
     }
 
-    public enum BinaryType
+    public enum BinaryOperator
     {
         None,
+        // Todo: And
+        // Todo: Or
         IfThen
+        // Todo: IfOnlyIf
     }
 
     public class BinaryNode : PropositionNode
     {
-        public BinaryType type;
+        public BinaryOperator type;
         public PropositionNode leftNode;
         public PropositionNode rightNode;
 
@@ -96,7 +99,7 @@ class Parser
     private Lexer.Token previousToken;
     private Stack<List<Node>> nodeStack;
 
-    public List<PremiseNode> Nodes;
+    public List<PropositionNode> Propositions;
     public List<string> Atomics;
 
     public Parser(string src)
@@ -105,7 +108,7 @@ class Parser
         nodeStack = new Stack<List<Node>>();
         nodeStack.Push(new List<Node>());
         NextToken();
-        Nodes = new List<PremiseNode>();
+        Propositions = new List<PropositionNode>();
         Atomics = new List<string>();
     }
 
@@ -171,17 +174,22 @@ class Parser
         else if (Match(Lexer.TokenType.Not))
         {
             PropositionNode node = ParseProposition();
-            result = new UnaryNode() { type = UnaryType.Not, node = node };
+            result = new UnaryNode() { type = UnaryOperator.Not, node = node };
             Consume(result, "Expected '}' after proposition");
         }
-        else if (Match(Lexer.TokenType.If))
+        else if (Match(Lexer.TokenType.IfThen))
         {
             PropositionNode ifNode = ParseProposition();
-            Consume(Lexer.TokenType.End, "Expected '}' after proposition");
-            Consume(Lexer.TokenType.Then, "Expected 'then{' after '}'");
             PropositionNode thenNode = ParseProposition();
-            result = new BinaryNode() {  type = BinaryType.IfThen, leftNode = ifNode, rightNode = thenNode };
-            Consume(result, "Expected '}' after proposition");
+            result = new BinaryNode() {  type = BinaryOperator.IfThen, leftNode = ifNode, rightNode = thenNode };
+            Consume(result, "Expected '}' after left and right propositions");
+        }
+        else if (Match(Lexer.TokenType.ThenIf))
+        {
+            PropositionNode thenNode = ParseProposition();
+            PropositionNode ifNode = ParseProposition();
+            result = new BinaryNode() {  type = BinaryOperator.IfThen, leftNode = ifNode, rightNode = thenNode };
+            Consume(result, "Expected '}' after left and right propositions");
         }
         else
             throw new ArgumentException("Expected proposition");
@@ -195,7 +203,7 @@ class Parser
             PropositionNode node = ParseProposition();
             List<Node> subnodes = nodeStack.Pop();
             nodeStack.Push(new List<Node>());
-            Nodes.Add(new PremiseNode() { subnodes = subnodes, node = node });
+            Propositions.Add(new PremiseNode() { subnodes = subnodes, node = node });
             Match(Lexer.TokenType.Stop);
         }
     }

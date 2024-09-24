@@ -9,8 +9,8 @@ public class Lexer
         Text,
         Atomic,
         Not,
-        If,
-        Then,
+        IfThen,
+        ThenIf,
         End,
         Stop
     }
@@ -80,8 +80,8 @@ public class Lexer
         return lexeme switch
         {
             "not" => TokenType.Not,
-            "if" => TokenType.If,
-            "then" => TokenType.Then,
+            "ifthen" => TokenType.IfThen,
+            "thenif" => TokenType.ThenIf,
             _ => TokenType.Atomic,
         };
     }
