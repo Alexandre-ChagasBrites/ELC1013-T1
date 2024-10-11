@@ -24,12 +24,28 @@ public class Example
         {
             Console.WriteLine($"Atomic: {atomic}");
         }
+        Console.WriteLine();
 
-        foreach (Parser.PropositionNode node in parser.Propositions)
+        foreach (PremiseNode node in parser.Premises)
         {
             node.Print();
             Console.Write(" ");
             node.PrintProposition();
+            Console.WriteLine();
+        }
+        Console.WriteLine();
+
+        Inferencer inferencer = new Inferencer();
+        foreach (PremiseNode node in parser.Premises.Take(parser.Premises.Count - 1))
+        {
+            inferencer.Infer(node.node);
+        }
+
+        foreach (PropositionNode node in inferencer.Propositions)
+        {
+            node.PrintProposition();
+            Console.Write(" ");
+            node.PrintGuess();
             Console.WriteLine();
         }
 

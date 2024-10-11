@@ -1,105 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Xml.Linq;
 
-class Parser
+public class Parser
 {
-    public abstract class Node
-    {
-        public abstract void Print();
-    }
-
-    public class TextNode : Node
-    {
-        public string text;
-
-        public override void Print()
-        {
-            Console.Write($"{text}");
-        }
-    }
-
-    public abstract class PropositionNode : Node
-    {
-        public List<Node> subnodes;
-
-        public override void Print()
-        {
-            foreach (Node node in subnodes)
-            {
-                node.Print();
-            }
-        }
-
-        public abstract void PrintProposition();
-    }
-
-    public class PremiseNode : PropositionNode
-    {
-        public PropositionNode node;
-
-        public override void PrintProposition()
-        {
-            node.PrintProposition();
-        }
-    }
-
-    public class AtomicNode : PropositionNode
-    {
-        public string name;
-
-        public override void PrintProposition()
-        {
-            Console.Write($"{name}");
-        }
-    }
-
-    public enum UnaryOperator
-    {
-        None,
-        Not
-    }
-
-    public class UnaryNode : PropositionNode
-    {
-        public UnaryOperator type;
-        public PropositionNode node;
-
-        public override void PrintProposition()
-        {
-            Console.Write("~");
-            node.PrintProposition();
-        }
-    }
-
-    public enum BinaryOperator
-    {
-        None,
-        // Todo: And
-        // Todo: Or
-        IfThen
-        // Todo: IfOnlyIf
-    }
-
-    public class BinaryNode : PropositionNode
-    {
-        public BinaryOperator type;
-        public PropositionNode leftNode;
-        public PropositionNode rightNode;
-
-        public override void PrintProposition()
-        {
-            leftNode.PrintProposition();
-            Console.Write(" -> ");
-            rightNode.PrintProposition();
-        }
-    }
-
     private Lexer lexer;
     private Lexer.Token currentToken;
     private Lexer.Token previousToken;
     private Stack<List<Node>> nodeStack;
 
-    public List<PropositionNode> Propositions;
+    public List<PremiseNode> Premises;
     public List<string> Atomics;
 
     public Parser(string src)
@@ -108,7 +18,7 @@ class Parser
         nodeStack = new Stack<List<Node>>();
         nodeStack.Push(new List<Node>());
         NextToken();
-        Propositions = new List<PropositionNode>();
+        Premises = new List<PremiseNode>();
         Atomics = new List<string>();
     }
 
@@ -181,14 +91,14 @@ class Parser
         {
             PropositionNode ifNode = ParseProposition();
             PropositionNode thenNode = ParseProposition();
-            result = new BinaryNode() {  type = BinaryOperator.IfThen, leftNode = ifNode, rightNode = thenNode };
+            result = new BinaryNode() { type = BinaryOperator.IfThen, leftNode = ifNode, rightNode = thenNode };
             Consume(result, "Expected '}' after left and right propositions");
         }
         else if (Match(Lexer.TokenType.ThenIf))
         {
             PropositionNode thenNode = ParseProposition();
             PropositionNode ifNode = ParseProposition();
-            result = new BinaryNode() {  type = BinaryOperator.IfThen, leftNode = ifNode, rightNode = thenNode };
+            result = new BinaryNode() { type = BinaryOperator.IfThen, leftNode = ifNode, rightNode = thenNode };
             Consume(result, "Expected '}' after left and right propositions");
         }
         else
@@ -203,7 +113,7 @@ class Parser
             PropositionNode node = ParseProposition();
             List<Node> subnodes = nodeStack.Pop();
             nodeStack.Push(new List<Node>());
-            Propositions.Add(new PremiseNode() { subnodes = subnodes, node = node });
+            Premises.Add(new PremiseNode() { subnodes = subnodes, node = node });
             Match(Lexer.TokenType.Stop);
         }
     }
