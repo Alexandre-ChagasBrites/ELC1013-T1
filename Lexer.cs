@@ -12,13 +12,17 @@ public class Lexer
         IfThen,
         ThenIf,
         End,
-        Stop
+        Stop,
+        And,
+        Or,
+        IfOnlyIf,
+        // TODO Adicionar o NotAtomic útil
     }
 
     public struct Token
     {
         public TokenType type;
-        // Todo: Substituir por ReadOnlySpan<char>
+        // Todo: Substituir por Memory<char>
         public string lexeme;
     }
 
@@ -82,6 +86,10 @@ public class Lexer
             "not" => TokenType.Not,
             "ifthen" => TokenType.IfThen,
             "thenif" => TokenType.ThenIf,
+            "and" => TokenType.And,
+            "or" => TokenType.Or,
+            "ifonlyif" => TokenType.IfOnlyIf,
+            // TODO Adicionar o tal de NotAtomic
             _ => TokenType.Atomic,
         };
     }

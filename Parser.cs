@@ -101,6 +101,27 @@ public class Parser
             result = new BinaryNode() { type = BinaryOperator.IfThen, leftNode = ifNode, rightNode = thenNode };
             Consume(result, "Expected '}' after left and right propositions");
         }
+        else if (Match(Lexer.TokenType.IfOnlyIf))
+        {
+            PropositionNode lhs = ParseProposition();
+            PropositionNode rhs = ParseProposition();
+            result = new BinaryNode() { type = BinaryOperator.IfOnlyIf, leftNode = lhs, rightNode = rhs };
+            Consume(result, "Expected '}' after left and right propositions");
+        }
+        else if (Match(Lexer.TokenType.And))
+        {
+            PropositionNode lhs = ParseProposition();
+            PropositionNode rhs = ParseProposition();
+            result = new BinaryNode() { type = BinaryOperator.And, leftNode = lhs, rightNode = rhs };
+            Consume(result, "Expected '}' after left and right propositions");
+        }
+        else if (Match(Lexer.TokenType.Or))
+        {
+            PropositionNode lhs = ParseProposition();
+            PropositionNode rhs = ParseProposition();
+            result = new BinaryNode() { type = BinaryOperator.Or, leftNode = lhs, rightNode = rhs };
+            Consume(result, "Expected '}' after left and right propositions");
+        }
         else
             throw new ArgumentException("Expected proposition");
         return result;
