@@ -1,138 +1,148 @@
 using System.Xml.Linq;
 
-public abstract class Node
+namespace ELC1013_T1
 {
-	public abstract void Print();
-}
+    public abstract class Node
+    {
+        public abstract IEnumerable<string> Print();
+    }
 
-public class TextNode : Node
-{
-	public string text;
+    public class TextNode : Node
+    {
+        public string text;
 
-	public override void Print()
-	{
-		Console.Write($"{text}");
-	}
-}
+        public override IEnumerable<string> Print()
+        {
+            yield return text;
+        }
+    }
 
-public abstract class PropositionNode : Node, IEquatable<PropositionNode>
-{
-	public List<Node> subnodes;
+    public abstract class PropositionNode : Node, IEquatable<PropositionNode>
+    {
+        public List<Node> subnodes;
 
-	public override void Print()
-	{
-		foreach (Node node in subnodes)
-		{
-			node.Print();
-		}
-	}
+        public override IEnumerable<string> Print()
+        {
+            foreach (Node node in subnodes)
+            {
+                foreach (var x in node.Print())
+                    yield return x;
+            }
+        }
 
-	public abstract void PrintProposition();
-	public abstract void PrintGuess();
-	public abstract bool Equals(PropositionNode other);
-}
+        public abstract IEnumerable<string> PrintProposition();
+        public abstract IEnumerable<string> PrintGuess();
+        public abstract bool Equals(PropositionNode other);
+    }
 
-public class PremiseNode : PropositionNode
-{
-	public PropositionNode node;
+    public class PremiseNode : PropositionNode
+    {
+        public PropositionNode node;
 
-	public override void PrintProposition()
-	{
-		node.PrintProposition();
-	}
+        public override IEnumerable<string> PrintProposition()
+        {
+            foreach (var x in node.PrintProposition())
+                yield return x;
+        }
 
-	public override void PrintGuess()
-	{
-		node.PrintGuess();
-	}
+        public override IEnumerable<string> PrintGuess()
+        {
+            foreach (var x in node.PrintGuess())
+                yield return x;
+        }
 
-	public override bool Equals(PropositionNode other)
-	{
-		return other is PremiseNode premise && premise.node.Equals(node);
-	}
-}
+        public override bool Equals(PropositionNode other)
+        {
+            return other is PremiseNode premise && premise.node.Equals(node);
+        }
+    }
 
-public class AtomicNode : PropositionNode
-{
-	public string name;
+    public class AtomicNode : PropositionNode
+    {
+        public string name;
 
-	public override void PrintProposition()
-	{
-		Console.Write($"{name}");
-	}
+        public override IEnumerable<string> PrintProposition()
+        {
+            yield return name;
+        }
 
-	public override void PrintGuess()
-	{
-		Print();
-	}
+        public override IEnumerable<string> PrintGuess() => Print();
 
-	public override bool Equals(PropositionNode other)
-	{
-		return other is AtomicNode atomic && atomic.name == name;
-	}
-}
+        public override bool Equals(PropositionNode other)
+        {
+            return other is AtomicNode atomic && atomic.name == name;
+        }
+    }
 
-public enum UnaryOperator
-{
-	None,
-	Not
-}
+    public enum UnaryOperator
+    {
+        None,
+        Not
+    }
 
-public class UnaryNode : PropositionNode
-{
-	public UnaryOperator type;
-	public PropositionNode node;
+    public class UnaryNode : PropositionNode
+    {
+        public UnaryOperator type;
+        public PropositionNode node;
 
-	public override void PrintProposition()
-	{
-		Console.Write("~");
-		node.PrintProposition();
-	}
+        public override IEnumerable<string> PrintProposition()
+        {
+            yield return "~";
+            foreach (var x in node.PrintProposition())
+                yield return x;
+        }
 
-	public override void PrintGuess()
-	{
-		Console.Write("não é verdade que ");
-		node.PrintGuess();
-	}
+        public override IEnumerable<string> PrintGuess()
+        {
+            yield return "não é verdade que ";
+            foreach (var x in node.PrintGuess())
+                yield return x;
+        }
 
-	public override bool Equals(PropositionNode other)
-	{
-		return other is UnaryNode unary && unary.type == type && unary.node.Equals(node);
-	}
-}
+        public override bool Equals(PropositionNode other)
+        {
+            return other is UnaryNode unary && unary.type == type && unary.node.Equals(node);
+        }
+    }
 
-public enum BinaryOperator
-{
-	None,
-	And,
-	Or,
-	IfThen,
-	IfOnlyIf
-}
+    public enum BinaryOperator
+    {
+        None,
+        And,
+        Or,
+        IfThen,
+        IfOnlyIf
+    }
 
-public class BinaryNode : PropositionNode
-{
-	public BinaryOperator type;
-	public PropositionNode leftNode;
-	public PropositionNode rightNode;
+    public class BinaryNode : PropositionNode
+    {
+        public BinaryOperator type;
+        public PropositionNode leftNode;
+        public PropositionNode rightNode;
 
-	public override void PrintProposition()
-	{
-		leftNode.PrintProposition();
-		Console.Write(" -> ");
-		rightNode.PrintProposition();
-	}
+        public override IEnumerable<string> PrintProposition()
+        {
+            foreach (var x in leftNode.PrintProposition())
+                yield return x;
+            leftNode.PrintProposition();
+            yield return " -> ";
+            foreach (var x in rightNode.PrintProposition())
+                yield return x;
+        }
 
-	public override void PrintGuess()
-	{
-		Console.Write("se ");
-		leftNode.PrintGuess();
-		Console.Write(", então ");
-		rightNode.PrintGuess();
-	}
+        public override IEnumerable<string> PrintGuess()
+        {
+            yield return "se ";
+            foreach (var x in leftNode.PrintGuess())
+                yield return x;
+            yield return ", então ";
+            foreach (var x in rightNode.PrintGuess())
+                yield return x;
+        }
 
-	public override bool Equals(PropositionNode other)
-	{
-		return other is BinaryNode binary && binary.type == type && binary.leftNode.Equals(leftNode) && binary.rightNode.Equals(rightNode);
-	}
+        public override bool Equals(PropositionNode other)
+        {
+            return other is BinaryNode binary && binary.type == type && binary.leftNode.Equals(leftNode) && binary.rightNode.Equals(rightNode);
+        }
+    }
 }
