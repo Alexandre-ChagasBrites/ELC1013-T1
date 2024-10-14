@@ -1,96 +1,101 @@
 using System;
 using System.Collections.Generic;
 
-public class Lexer
+namespace ELC1013_T1
 {
-    public enum TokenType
+    public class Lexer
     {
-        None,
-        Text,
-        Atomic,
-        Not,
-        IfThen,
-        ThenIf,
-        End,
-        Stop,
-        And,
-        Or,
-        IfOnlyIf,
-        // TODO Adicionar o NotAtomic útil
-    }
-
-    public struct Token
-    {
-        public TokenType type;
-        // Todo: Substituir por Memory<char>
-        public string lexeme;
-    }
-
-    private string src;
-    private int index = 0;
-
-    public Lexer(string src)
-    {
-        this.src = src;
-    }
-
-    public Token ReadToken()
-    {
-        if (index >= src.Length)
-            return new Token() { type = TokenType.None };
-
-        TokenType type = TokenType.Text;
-        int start = index;
-
-        if (src[index] == '\n')
+        public enum TokenType
         {
-            type = TokenType.Stop;
-            index++;
+            None,
+            Text,
+            Atomic,
+            Not,
+            IfThen,
+            ThenIf,
+            Close,
+            End,
+            And,
+            Or,
+            IfOnlyIf,
+            // TODO Adicionar o NotAtomic útil
         }
-        else if (src[index] == '}')
+
+        public struct Token
         {
-            type = TokenType.End;
-            index++;
+            public TokenType type;
+            public string lexeme;
+            public int line;
         }
-        else
+
+        private string src;
+        private int index = 0;
+        private int line = 1;
+
+        public Lexer(string src)
         {
-            // Avança o index até encontrar um caractere especial
-            while (index < src.Length && src[index] != '{' && src[index] != '}' && src[index] != '\n')
-                index++;
-            // Depois que é lido até o '{' é preciso identificar
-            // se o token é do tipo Text recuando o index
-            if (index < src.Length && src[index] == '{')
+            this.src = src.Replace("\r\n", "\n");
+        }
+
+        public Token ReadToken()
+        {
+            if (index >= src.Length)
+                return new Token() { type = TokenType.None, line = line };
+
+            TokenType type = TokenType.Text;
+            int start = index;
+
+            if (src[index] == '\n')
             {
-                int tmp = index;
-                while (tmp > start && !Char.IsWhiteSpace(src[tmp]))
-                    tmp--;
-                // Se for encontrado um WhiteSpace após o
-                // recuo então o token é do tipo Text 
-                if (Char.IsWhiteSpace(src[tmp]))
-                    index = tmp + 1;
-                else
-                {
-                    type = GetTokenType(src.Substring(start, index - start));
+                type = TokenType.End;
+                index++;
+                line++;
+            }
+            else if (src[index] == '}')
+            {
+                type = TokenType.Close;
+                index++;
+            }
+            else
+            {
+                // Avança o index até encontrar um caractere especial
+                while (index < src.Length && src[index] != '{' && src[index] != '}' && src[index] != '\n')
                     index++;
+                // Depois que é lido até o '{' é preciso identificar
+                // se o token é do tipo Text recuando o index
+                if (index < src.Length && src[index] == '{')
+                {
+                    int tmp = index;
+                    while (tmp > start && !Char.IsWhiteSpace(src[tmp]))
+                        tmp--;
+                    // Se for encontrado um WhiteSpace após o
+                    // recuo então o token é do tipo Text 
+                    if (Char.IsWhiteSpace(src[tmp]))
+                        index = tmp + 1;
+                    else
+                    {
+                        type = GetTokenType(src.Substring(start, index - start));
+                        index++;
+                    }
                 }
             }
+
+            return new Token() { type = type, lexeme = src.Substring(start, index - start), line = line };
         }
 
-        return new Token() { type = type, lexeme = src.Substring(start, index - start) };
-    }
-
-    private TokenType GetTokenType(string lexeme)
-    {
-        return lexeme switch
+        private TokenType GetTokenType(string lexeme)
         {
-            "not" => TokenType.Not,
-            "ifthen" => TokenType.IfThen,
-            "thenif" => TokenType.ThenIf,
-            "and" => TokenType.And,
-            "or" => TokenType.Or,
-            "ifonlyif" => TokenType.IfOnlyIf,
-            // TODO Adicionar o tal de NotAtomic
-            _ => TokenType.Atomic,
-        };
+            return lexeme switch
+            {
+                "not" => TokenType.Not,
+                "ifthen" => TokenType.IfThen,
+                "thenif" => TokenType.ThenIf,
+                "and" => TokenType.And,
+                "or" => TokenType.Or,
+                "ifonlyif" => TokenType.IfOnlyIf,
+                // TODO Adicionar o tal de NotAtomic
+                _ => TokenType.Atomic,
+            };
+        }
     }
 }
