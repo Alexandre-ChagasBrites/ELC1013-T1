@@ -91,7 +91,7 @@ public class UnaryNode : PropositionNode
 
 	public override void PrintGuess()
 	{
-		Console.Write("não ");
+		Console.Write("não é verdade que ");
 		node.PrintGuess();
 	}
 
@@ -104,10 +104,10 @@ public class UnaryNode : PropositionNode
 public enum BinaryOperator
 {
 	None,
-	// Todo: And
-	// Todo: Or
-	IfThen
-	// Todo: IfOnlyIf
+	And,
+	Or,
+	IfThen,
+	IfOnlyIf
 }
 
 public class BinaryNode : PropositionNode

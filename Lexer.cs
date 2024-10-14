@@ -11,8 +11,8 @@ public class Lexer
         Not,
         IfThen,
         ThenIf,
-        End,
-        Stop
+        Close,
+        End
     }
 
     public struct Token
@@ -40,12 +40,12 @@ public class Lexer
 
         if (src[index] == '\n')
         {
-            type = TokenType.Stop;
+            type = TokenType.End;
             index++;
         }
         else if (src[index] == '}')
         {
-            type = TokenType.End;
+            type = TokenType.Close;
             index++;
         }
         else

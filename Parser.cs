@@ -37,7 +37,7 @@ public class Parser
     {
         if (currentToken.type == type)
         {
-            if (type != Lexer.TokenType.End && type != Lexer.TokenType.Stop)
+            if (type != Lexer.TokenType.Close && type != Lexer.TokenType.End)
             {
                 nodeStack.Push(new List<Node>());
             }
@@ -59,7 +59,7 @@ public class Parser
 
     private void Consume(PropositionNode node, string message)
     {
-        if (currentToken.type == Lexer.TokenType.End)
+        if (currentToken.type == Lexer.TokenType.Close)
         {
             List<Node> subnodes = nodeStack.Pop();
             node.subnodes = subnodes;
@@ -72,7 +72,7 @@ public class Parser
 
     private PropositionNode ParseProposition()
     {
-        PropositionNode result = null;
+        PropositionNode result;
         if (Match(Lexer.TokenType.Atomic))
         {
             string name = previousToken.lexeme.Substring(0, previousToken.lexeme.Length - 1);
@@ -92,14 +92,14 @@ public class Parser
             PropositionNode ifNode = ParseProposition();
             PropositionNode thenNode = ParseProposition();
             result = new BinaryNode() { type = BinaryOperator.IfThen, leftNode = ifNode, rightNode = thenNode };
-            Consume(result, "Expected '}' after left and right propositions");
+            Consume(result, "Expected '}' after if and then propositions");
         }
         else if (Match(Lexer.TokenType.ThenIf))
         {
             PropositionNode thenNode = ParseProposition();
             PropositionNode ifNode = ParseProposition();
             result = new BinaryNode() { type = BinaryOperator.IfThen, leftNode = ifNode, rightNode = thenNode };
-            Consume(result, "Expected '}' after left and right propositions");
+            Consume(result, "Expected '}' after then and if propositions");
         }
         else
             throw new ArgumentException("Expected proposition");
@@ -114,7 +114,7 @@ public class Parser
             List<Node> subnodes = nodeStack.Pop();
             nodeStack.Push(new List<Node>());
             Premises.Add(new PremiseNode() { subnodes = subnodes, node = node });
-            Match(Lexer.TokenType.Stop);
+            Match(Lexer.TokenType.End);
         }
     }
 }
