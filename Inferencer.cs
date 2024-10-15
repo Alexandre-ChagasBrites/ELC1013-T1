@@ -32,7 +32,7 @@ namespace ELC1013_T1
             foreach (PropositionNode modusPonens in ModusPonens(premise))
                 yield return modusPonens;
 
-            if (premise is UnaryNode notNode && notNode.type == UnaryOperator.Not)
+            if (premise is NotNode notNode)
             {
                 foreach (PropositionNode modusTollens in ModusTollens(notNode))
                     yield return modusTollens;
@@ -41,7 +41,7 @@ namespace ELC1013_T1
                     yield return silogismoDisjuntivo;
             }
 
-            if (premise is BinaryNode ifthenNode && ifthenNode.type == BinaryOperator.IfThen)
+            if (premise is IfThenNode ifthenNode)
             {
                 foreach (PropositionNode silogismoHipotetico in SilogismoHipotetico(ifthenNode))
                     yield return silogismoHipotetico;
@@ -51,29 +51,29 @@ namespace ELC1013_T1
         private IEnumerable<PropositionNode> ModusPonens(PropositionNode premise)
         {
             return Propositions.OfType<BinaryNode>()
-                .Where(node => node.type == BinaryOperator.IfThen && node.leftNode.Equals(premise))
+                .Where(node => node is IfThenNode && node.leftNode.Equals(premise))
                 .Select(node => node.rightNode);
         }
 
-        private IEnumerable<PropositionNode> ModusTollens(UnaryNode notNode)
+        private IEnumerable<PropositionNode> ModusTollens(NotNode notNode)
         {
             return Propositions.OfType<BinaryNode>()
-                .Where(node => node.type == BinaryOperator.IfThen && node.rightNode.Equals(notNode.node))
-                .Select(node => new UnaryNode() { type = UnaryOperator.Not, node = node.leftNode });
+                .Where(node => node is IfThenNode && node.rightNode.Equals(notNode.node))
+                .Select(node => new NotNode() { node = node.leftNode });
         }
 
         private IEnumerable<PropositionNode> SilogismoHipotetico(BinaryNode ifthenNode)
         {
             return Propositions.OfType<BinaryNode>()
-                .Where(node => node.type == BinaryOperator.IfThen && node.rightNode.Equals(ifthenNode.leftNode))
-                .Select(node => new BinaryNode() { type = BinaryOperator.IfThen, leftNode = node.leftNode, rightNode = ifthenNode.rightNode });
+                .Where(node => node is IfThenNode && node.rightNode.Equals(ifthenNode.leftNode))
+                .Select(node => new IfThenNode() { leftNode = node.leftNode, rightNode = ifthenNode.rightNode });
         }
 
-        private IEnumerable<PropositionNode> SilogismoDisjuntivo(UnaryNode notNode)
+        private IEnumerable<PropositionNode> SilogismoDisjuntivo(NotNode notNode)
         {
             return Propositions.OfType<BinaryNode>()
-                .Where(node => node.type == BinaryOperator.Or && node.leftNode.Equals(notNode.node))
-                .Select(node => new UnaryNode() { type = UnaryOperator.Not, node = node.rightNode });
+                .Where(node => node is OrNode && node.leftNode.Equals(notNode.node))
+                .Select(node => new NotNode() { node = node.rightNode });
         }
     }
 }

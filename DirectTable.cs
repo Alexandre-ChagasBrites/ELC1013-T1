@@ -23,26 +23,17 @@ namespace ELC1013_T1
 
                 bool Eval(PropositionNode pn)
                 {
-                    switch (pn)
+                    return pn switch
                     {
-                        case PremiseNode premise:
-                            return Eval(premise.node);
-                        case AtomicNode an:
-                            return 1u == ((i >> atomics.IndexOf(an.name)) & 1u);
-                        case UnaryNode un:
-                            Debug.Assert(UnaryOperator.Not == un.type);
-                            return !Eval(un.node);
-                        case BinaryNode bn:
-                            return bn.type switch
-                            {
-                                BinaryOperator.And      =>  Eval(bn.leftNode) && Eval(bn.rightNode),
-                                BinaryOperator.Or       =>  Eval(bn.leftNode) || Eval(bn.rightNode),
-                                BinaryOperator.IfOnlyIf =>  Eval(bn.leftNode) == Eval(bn.rightNode),
-                                BinaryOperator.IfThen   => !Eval(bn.leftNode) || Eval(bn.rightNode),
-                                _ => throw new ArgumentException("Invalid node type"),
-                            };
-                        default: throw new ArgumentException($"Invalid node type: {pn.GetType}");
-                    }
+                         PremiseNode premise => Eval(premise.node),
+                          AtomicNode   an    => 1u == ((i >> atomics.IndexOf(an.name)) & 1u),
+                             NotNode   un    => !Eval(  un.node),
+                             AndNode   an    =>  Eval(  an.leftNode) && Eval(  an.rightNode),
+                              OrNode   on    =>  Eval(  on.leftNode) || Eval(  on.rightNode),
+                          IfThenNode  itn    => !Eval( itn.leftNode) || Eval( itn.rightNode),
+                        IfOnlyIfNode ioin    =>  Eval(ioin.leftNode) == Eval(ioin.rightNode),
+                        _ => throw new ArgumentException($"Invalid node type: {pn.GetType}"),
+                    };
                 }
             Skip:;
             }

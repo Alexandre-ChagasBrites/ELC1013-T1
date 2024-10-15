@@ -93,42 +93,42 @@ namespace ELC1013_T1
             else if (Match(Lexer.TokenType.Not))
             {
                 PropositionNode node = ParseProposition();
-                result = new UnaryNode() { type = UnaryOperator.Not, node = node };
+                result = new NotNode() { node = node };
                 Consume(result, "Expected '}' after proposition");
             }
             else if (Match(Lexer.TokenType.IfThen))
             {
                 PropositionNode ifNode = ParseProposition();
                 PropositionNode thenNode = ParseProposition();
-                result = new BinaryNode() { type = BinaryOperator.IfThen, leftNode = ifNode, rightNode = thenNode };
+                result = new IfThenNode() { leftNode = ifNode, rightNode = thenNode };
                 Consume(result, "Expected '}' after if and then propositions");
             }
             else if (Match(Lexer.TokenType.ThenIf))
             {
                 PropositionNode thenNode = ParseProposition();
                 PropositionNode ifNode = ParseProposition();
-                result = new BinaryNode() { type = BinaryOperator.IfThen, leftNode = ifNode, rightNode = thenNode };
+                result = new IfThenNode() { leftNode = ifNode, rightNode = thenNode };
                 Consume(result, "Expected '}' after then and if propositions");
             }
             else if (Match(Lexer.TokenType.IfOnlyIf))
             {
                 PropositionNode lhs = ParseProposition();
                 PropositionNode rhs = ParseProposition();
-                result = new BinaryNode() { type = BinaryOperator.IfOnlyIf, leftNode = lhs, rightNode = rhs };
+                result = new IfOnlyIfNode() { leftNode = lhs, rightNode = rhs };
                 Consume(result, "Expected '}' after left and right propositions");
             }
             else if (Match(Lexer.TokenType.And))
             {
                 PropositionNode lhs = ParseProposition();
                 PropositionNode rhs = ParseProposition();
-                result = new BinaryNode() { type = BinaryOperator.And, leftNode = lhs, rightNode = rhs };
+                result = new AndNode() { leftNode = lhs, rightNode = rhs };
                 Consume(result, "Expected '}' after left and right propositions");
             }
             else if (Match(Lexer.TokenType.Or))
             {
                 PropositionNode lhs = ParseProposition();
                 PropositionNode rhs = ParseProposition();
-                result = new BinaryNode() { type = BinaryOperator.Or, leftNode = lhs, rightNode = rhs };
+                result = new OrNode() { leftNode = lhs, rightNode = rhs };
                 Consume(result, "Expected '}' after left and right propositions");
             }
             else
