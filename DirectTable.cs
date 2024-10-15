@@ -13,29 +13,16 @@ namespace ELC1013_T1
         {
             bool isValid = true;
 
-            for (ulong i = 0; isValid && (i < (1u << premises.Count)); i++)
+            Evaluator e = new() { truthyness = 0, atomics = atomics };
+
+            for (e.truthyness = 0; isValid && (e.truthyness < (1u << premises.Count)); e.truthyness++)
             {
                 for (int j = 0; j < premises.Count - 1; j++)
-                    if (!Eval(premises[j]))
+                    if (premises[j].Eval(in e))
                         goto Skip;
 
-                isValid = Eval(premises[premises.Count - 1]);
-
-                bool Eval(PropositionNode pn)
-                {
-                    return pn switch
-                    {
-                         PremiseNode premise => Eval(premise.node),
-                          AtomicNode   an    => 1u == ((i >> atomics.IndexOf(an.name)) & 1u),
-                             NotNode   un    => !Eval(  un.node),
-                             AndNode   an    =>  Eval(  an.leftNode) && Eval(  an.rightNode),
-                              OrNode   on    =>  Eval(  on.leftNode) || Eval(  on.rightNode),
-                          IfThenNode  itn    => !Eval( itn.leftNode) || Eval( itn.rightNode),
-                        IfOnlyIfNode ioin    =>  Eval(ioin.leftNode) == Eval(ioin.rightNode),
-                        _ => throw new ArgumentException($"Invalid node type: {pn.GetType}"),
-                    };
-                }
-            Skip:;
+                isValid = premises[premises.Count - 1].Eval(in e);
+                Skip:;
             }
 
             return isValid;

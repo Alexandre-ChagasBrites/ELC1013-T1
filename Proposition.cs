@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace ELC1013_T1
 {
     public abstract class Node
@@ -19,6 +21,8 @@ namespace ELC1013_T1
     {
         public List<Node> subnodes;
 
+        public abstract bool Eval(ref readonly Evaluator context);
+
         public override IEnumerable<ReadOnlyMemory<char>> Print()
         {
             foreach (Node node in subnodes)
@@ -33,9 +37,18 @@ namespace ELC1013_T1
         public abstract bool Equals(PropositionNode other);
     }
 
+    public struct Evaluator()
+    {
+        internal ulong truthyness;
+        internal List<string> atomics;
+        // TODO Deveria checar que há no máximo 63 ou 63 atômicos...
+    }
+
     public class PremiseNode : PropositionNode
     {
         public PropositionNode node;
+
+        public override sealed bool Eval(ref readonly Evaluator context) => node.Eval(in context);
 
         public override IEnumerable<ReadOnlyMemory<char>> PrintProposition()
         {
@@ -64,6 +77,11 @@ namespace ELC1013_T1
         /// </summary>
         public string name;
 
+        public override sealed bool Eval(ref readonly Evaluator context)
+        {
+              return 1u == ((context.truthyness >> context.atomics.IndexOf(name)) & 1u);
+        }
+
         public override IEnumerable<ReadOnlyMemory<char>> PrintProposition()
         {
             yield return name.AsMemory();
@@ -80,6 +98,8 @@ namespace ELC1013_T1
     public class NotNode : PropositionNode
     {
         public PropositionNode node;
+
+        public override sealed bool Eval(ref readonly Evaluator context) => !node.Eval(in context);
 
         public override IEnumerable<ReadOnlyMemory<char>> PrintProposition()
         {
@@ -138,6 +158,11 @@ namespace ELC1013_T1
 
     public sealed class AndNode : BinaryNode
     {
+        public override sealed bool Eval(ref readonly Evaluator context)
+        {
+            return leftNode.Eval(in context) && rightNode.Eval(in context);
+        }
+
         public override ReadOnlyMemory<char> PropositionOperator => " ^ ".AsMemory();
         public override ReadOnlyMemory<char> GuessBefore => "".AsMemory();
         public override ReadOnlyMemory<char> GuessMiddle => " e ".AsMemory();
@@ -150,6 +175,11 @@ namespace ELC1013_T1
 
     public sealed class OrNode : BinaryNode
     {
+        public override sealed bool Eval(ref readonly Evaluator context)
+        {
+            return leftNode.Eval(in context) || rightNode.Eval(in context);
+        }
+
         public override ReadOnlyMemory<char> PropositionOperator => " V ".AsMemory();
         public override ReadOnlyMemory<char> GuessBefore => "".AsMemory();
         public override ReadOnlyMemory<char> GuessMiddle => " ou ".AsMemory();
@@ -161,6 +191,11 @@ namespace ELC1013_T1
     }
     public sealed class IfThenNode : BinaryNode
     {
+        public override sealed bool Eval(ref readonly Evaluator context)
+        {
+            return !leftNode.Eval(in context) || rightNode.Eval(in context);
+        }
+
         public override ReadOnlyMemory<char> PropositionOperator => " -> ".AsMemory();
         public override ReadOnlyMemory<char> GuessBefore => "se ".AsMemory();
         public override ReadOnlyMemory<char> GuessMiddle => ", então ".AsMemory();
@@ -172,6 +207,11 @@ namespace ELC1013_T1
     }
     public sealed class IfOnlyIfNode : BinaryNode
     {
+        public override sealed bool Eval(ref readonly Evaluator context)
+        {
+            return leftNode.Eval(in context) == rightNode.Eval(in context);
+        }
+
         public override ReadOnlyMemory<char> PropositionOperator => " <-> ".AsMemory();
         public override ReadOnlyMemory<char> GuessBefore => "se ".AsMemory();
         public override ReadOnlyMemory<char> GuessMiddle => ", e somente se ".AsMemory();
