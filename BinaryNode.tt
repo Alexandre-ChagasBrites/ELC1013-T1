@@ -1,0 +1,37 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Memory.dll" #>
+<#@ output extension=".cs" #>
+namespace ELC1013_T1
+{
+<#
+	BinaryNode[] bns = {
+		new("And"     , " ^ "  , ""   , " e "            , (lhs, rhs) =>  $"{lhs} && {rhs}"),
+		new("Or"      , " V "  , ""   , " ou "           , (lhs, rhs) =>  $"{lhs} || {rhs}"),
+		new("IfThen"  , " -> " , "se ", ", então "       , (lhs, rhs) => $"!{lhs} || {rhs}"),
+		new("IfOnlyIf", " <-> ", "se ", ", e somente se ", (lhs, rhs) =>  $"{lhs} == {rhs}"),
+	};
+
+	foreach (ref readonly BinaryNode bn in bns.AsSpan())
+	{#>
+    public sealed class <#=bn.Name#>Node : BinaryNode
+    {
+        public override sealed bool Eval(ref readonly Evaluator context)
+        {
+            return <#=bn.Eval("leftNode.Eval(in context)", "rightNode.Eval(in context)")#>;
+        }
+
+        public override ReadOnlyMemory<char> PropositionOperator => "<#=bn.Operator#>".AsMemory();
+        public override ReadOnlyMemory<char> GuessBefore => "<#=bn.Before#>".AsMemory();
+        public override ReadOnlyMemory<char> GuessMiddle => "<#=bn.Middle#>".AsMemory();
+
+        public override bool Equals(PropositionNode other)
+        {
+            return other is <#=bn.Name#>Node && base.Equals(other);
+        }
+    }
+<#}#>
+}
+<#+
+record struct BinaryNode(string Name, string Operator, string Before, string Middle, Func<string, string, string> Eval);
+#>
