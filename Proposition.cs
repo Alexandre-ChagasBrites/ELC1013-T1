@@ -4,14 +4,17 @@ namespace ELC1013_T1
 {
     public abstract class Node
     {
-        public abstract IEnumerable<string> Print();
+        public abstract IEnumerable<ReadOnlyMemory<char>> Print();
     }
 
     public class TextNode : Node
     {
+        public ReadOnlyMemory<char> text;
+#if false
         public string text;
+#endif
 
-        public override IEnumerable<string> Print()
+        public override IEnumerable<ReadOnlyMemory<char>> Print()
         {
             yield return text;
         }
@@ -21,7 +24,7 @@ namespace ELC1013_T1
     {
         public List<Node> subnodes;
 
-        public override IEnumerable<string> Print()
+        public override IEnumerable<ReadOnlyMemory<char>> Print()
         {
             foreach (Node node in subnodes)
             {
@@ -30,8 +33,8 @@ namespace ELC1013_T1
             }
         }
 
-        public abstract IEnumerable<string> PrintProposition();
-        public abstract IEnumerable<string> PrintGuess();
+        public abstract IEnumerable<ReadOnlyMemory<char>> PrintProposition();
+        public abstract IEnumerable<ReadOnlyMemory<char>> PrintGuess();
         public abstract bool Equals(PropositionNode other);
     }
 
@@ -39,13 +42,13 @@ namespace ELC1013_T1
     {
         public PropositionNode node;
 
-        public override IEnumerable<string> PrintProposition()
+        public override IEnumerable<ReadOnlyMemory<char>> PrintProposition()
         {
             foreach (var x in node.PrintProposition())
                 yield return x;
         }
 
-        public override IEnumerable<string> PrintGuess()
+        public override IEnumerable<ReadOnlyMemory<char>> PrintGuess()
         {
             foreach (var x in node.PrintGuess())
                 yield return x;
@@ -61,12 +64,12 @@ namespace ELC1013_T1
     {
         public string name;
 
-        public override IEnumerable<string> PrintProposition()
+        public override IEnumerable<ReadOnlyMemory<char>> PrintProposition()
         {
-            yield return name;
+            yield return name.AsMemory();
         }
 
-        public override IEnumerable<string> PrintGuess() => Print();
+        public override IEnumerable<ReadOnlyMemory<char>> PrintGuess() => Print();
 
         public override bool Equals(PropositionNode other)
         {
@@ -85,16 +88,16 @@ namespace ELC1013_T1
         public UnaryOperator type;
         public PropositionNode node;
 
-        public override IEnumerable<string> PrintProposition()
+        public override IEnumerable<ReadOnlyMemory<char>> PrintProposition()
         {
-            yield return "~";
+            yield return "~".AsMemory();
             foreach (var x in node.PrintProposition())
                 yield return x;
         }
 
-        public override IEnumerable<string> PrintGuess()
+        public override IEnumerable<ReadOnlyMemory<char>> PrintGuess()
         {
-            yield return "não é verdade que ";
+            yield return "não é verdade que ".AsMemory();
             foreach (var x in node.PrintGuess())
                 yield return x;
         }
@@ -120,40 +123,40 @@ namespace ELC1013_T1
         public PropositionNode leftNode;
         public PropositionNode rightNode;
 
-        public override IEnumerable<string> PrintProposition()
+        public override IEnumerable<ReadOnlyMemory<char>> PrintProposition()
         {
             foreach (var x in leftNode.PrintProposition())
                 yield return x;
             leftNode.PrintProposition();
-            yield return type switch {
+            yield return (type switch {
                 BinaryOperator.And => " ^ ",
                 BinaryOperator.Or => " V ",
                 BinaryOperator.IfThen => " -> ",
                 BinaryOperator.IfOnlyIf => " <-> ",
                 _ => throw new ArgumentOutOfRangeException("Invalid binary node")
-            };
+            }).AsMemory();
             foreach (var x in rightNode.PrintProposition())
                 yield return x;
         }
 
-        public override IEnumerable<string> PrintGuess()
+        public override IEnumerable<ReadOnlyMemory<char>> PrintGuess()
         {
-            yield return type switch {
+            yield return (type switch {
                 BinaryOperator.And => "",
                 BinaryOperator.Or => "",
                 BinaryOperator.IfThen => "se ",
                 BinaryOperator.IfOnlyIf => "se ",
                 _ => throw new ArgumentOutOfRangeException("Invalid binary node")
-            };
+            }).AsMemory();
             foreach (var x in leftNode.PrintGuess())
                 yield return x;
-            yield return type switch {
+            yield return (type switch {
                 BinaryOperator.And => " e ",
                 BinaryOperator.Or => " ou ",
                 BinaryOperator.IfThen => ", então ",
                 BinaryOperator.IfOnlyIf => ", e somente se ",
                 _ => throw new ArgumentOutOfRangeException("Invalid binary node")
-            };
+            }).AsMemory();
             foreach (var x in rightNode.PrintGuess())
                 yield return x;
         }

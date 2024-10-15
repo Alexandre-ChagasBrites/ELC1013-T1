@@ -84,7 +84,7 @@ namespace ELC1013_T1
             PropositionNode result;
             if (Match(Lexer.TokenType.Atomic))
             {
-                string name = previousToken.lexeme.Substring(0, previousToken.lexeme.Length - 1);
+                string name = previousToken.lexeme.Slice(0, previousToken.lexeme.Length - 1).ToString();
                 result = new AtomicNode() { name = name };
                 Consume(result, "Expected '}' after atomic");
                 if (!Atomics.Contains(name))

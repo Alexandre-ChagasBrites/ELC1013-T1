@@ -24,7 +24,10 @@ namespace ELC1013_T1
         public struct Token
         {
             public TokenType type;
+            public ReadOnlyMemory<char> lexeme;
+#if false
             public string lexeme;
+#endif
             public int line;
         }
 
@@ -80,7 +83,7 @@ namespace ELC1013_T1
                 }
             }
 
-            return new Token() { type = type, lexeme = src.Substring(start, index - start), line = line };
+            return new Token() { type = type, lexeme = src.AsMemory(start, index - start), line = line };
         }
 
         private TokenType GetTokenType(string lexeme)
