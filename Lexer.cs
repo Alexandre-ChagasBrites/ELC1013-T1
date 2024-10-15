@@ -25,9 +25,6 @@ namespace ELC1013_T1
         {
             public TokenType type;
             public ReadOnlyMemory<char> lexeme;
-#if false
-            public string lexeme;
-#endif
             public int line;
         }
 
