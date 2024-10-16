@@ -1,0 +1,82 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+<#@ assembly name="System.Memory.dll" #>
+<#
+TokenTypeOperator[] ttos =
+{
+    new("Not"     , "not"     , [0  ], "not"           ),
+    new("IfThen"  , "ifthen"  , [0,1], "if and then"   ),
+    new("ThenIf"  , "thenif"  , [1,0], "then and if", "IfThen"),
+    new("And"     , "and"     , [0,1], "and"           ),
+    new("Or"      , "or"      , [0,1], "or"            ),
+    new("IfOnlyIf", "ifonlyif", [0,1], "left and right"), 
+    // TODO Adicionar o NotAtomic útil, pra antônimos.
+};
+#>
+namespace ELC1013_T1
+{
+    public partial class Lexer
+    {
+        public enum TokenType
+        {
+            None,
+            Text,
+            Close,
+            End,
+            Atomic,
+<#foreach (ref readonly TokenTypeOperator tto in ttos.AsSpan()) {#>
+            <#=tto.Identifier#>,
+<#}#>
+        }
+
+        static private TokenType GetTokenType(string lexeme)
+        {
+            return lexeme switch
+            {
+<#foreach (ref readonly TokenTypeOperator tto in ttos.AsSpan()) {#>
+                "<#=tto.Lexeme#>" => TokenType.<#=tto.Identifier#>,
+<#}#>
+                _ => TokenType.Atomic,
+            };
+        }
+    }
+
+    public partial class Parser
+    {
+        private PropositionNode ParseProposition()
+        {
+            PropositionNode result;
+            if (Match(Lexer.TokenType.Atomic))
+            {
+                string name = previousToken.lexeme.Slice(0, previousToken.lexeme.Length - 1).ToString();
+                result = new AtomicNode() { name = name };
+                Consume(result, "Expected '}' after atomic");
+                if (!Atomics.Contains(name))
+                    Atomics.Add(name);
+            }
+<#foreach (ref readonly TokenTypeOperator tto in ttos.AsSpan()) {#>
+            else if (Match(Lexer.TokenType.<#=tto.Identifier#>))
+            {
+    <#for (int i = 0; i < tto.Order.Length; i++) {#>
+                PropositionNode node<#=i#> = ParseProposition();
+    <#}#>
+                result = new <#=tto.Actual ?? tto.Identifier#>Node(<#=tto.Parameters()#>);
+                Consume(result, "Expected '}' after <#=tto.Expected#> proposition(s)");
+            }
+<#}#>
+            else
+                throw GenerateError("Expected proposition");
+            return result;
+        }
+    }
+}
+<#+
+record struct TokenTypeOperator(string Identifier, string Lexeme, int[] Order, string Expected, string Actual = null)
+{
+    internal string Parameters() => string.Join(", ", Order.Select(o => $"node{o}"));
+}
+#>

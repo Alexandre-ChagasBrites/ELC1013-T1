@@ -2,6 +2,8 @@
 {
     public sealed class AndNode : BinaryNode
     {
+        public AndNode(PropositionNode rhs, PropositionNode lhs) : base(rhs, lhs) { }
+
         public override sealed bool Eval(ref readonly Evaluator context)
         {
             return leftNode.Eval(in context) && rightNode.Eval(in context);
@@ -18,6 +20,8 @@
     }
     public sealed class OrNode : BinaryNode
     {
+        public OrNode(PropositionNode rhs, PropositionNode lhs) : base(rhs, lhs) { }
+
         public override sealed bool Eval(ref readonly Evaluator context)
         {
             return leftNode.Eval(in context) || rightNode.Eval(in context);
@@ -34,6 +38,8 @@
     }
     public sealed class IfThenNode : BinaryNode
     {
+        public IfThenNode(PropositionNode rhs, PropositionNode lhs) : base(rhs, lhs) { }
+
         public override sealed bool Eval(ref readonly Evaluator context)
         {
             return !leftNode.Eval(in context) || rightNode.Eval(in context);
@@ -50,6 +56,8 @@
     }
     public sealed class IfOnlyIfNode : BinaryNode
     {
+        public IfOnlyIfNode(PropositionNode rhs, PropositionNode lhs) : base(rhs, lhs) { }
+
         public override sealed bool Eval(ref readonly Evaluator context)
         {
             return leftNode.Eval(in context) == rightNode.Eval(in context);

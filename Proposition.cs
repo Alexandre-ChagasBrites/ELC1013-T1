@@ -97,6 +97,11 @@ namespace ELC1013_T1
     {
         public PropositionNode node;
 
+        public NotNode(PropositionNode pn)
+        {
+            node = pn;
+        }
+
         public override sealed bool Eval(ref readonly Evaluator context) => !node.Eval(in context);
 
         public override IEnumerable<ReadOnlyMemory<char>> PrintProposition()
@@ -123,6 +128,12 @@ namespace ELC1013_T1
     {
         public PropositionNode leftNode;
         public PropositionNode rightNode;
+
+        public BinaryNode(PropositionNode lhs, PropositionNode rhs)
+        {
+            leftNode = lhs;
+            rightNode = rhs;
+        }
 
         public abstract ReadOnlyMemory<char> PropositionOperator { get; }
         public abstract ReadOnlyMemory<char> GuessBefore { get; }

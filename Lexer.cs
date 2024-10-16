@@ -3,24 +3,8 @@ using System.Collections.Generic;
 
 namespace ELC1013_T1
 {
-    public class Lexer
+    public partial class Lexer
     {
-        public enum TokenType
-        {
-            None,
-            Text,
-            Atomic,
-            Not,
-            IfThen,
-            ThenIf,
-            Close,
-            End,
-            And,
-            Or,
-            IfOnlyIf,
-            // TODO Adicionar o NotAtomic útil
-        }
-
         public struct Token
         {
             public TokenType type;
@@ -84,21 +68,6 @@ namespace ELC1013_T1
             }
 
             return new Token() { type = type, lexeme = src.AsMemory(start, index - start), line = line };
-        }
-
-        private TokenType GetTokenType(string lexeme)
-        {
-            return lexeme switch
-            {
-                "not" => TokenType.Not,
-                "ifthen" => TokenType.IfThen,
-                "thenif" => TokenType.ThenIf,
-                "and" => TokenType.And,
-                "or" => TokenType.Or,
-                "ifonlyif" => TokenType.IfOnlyIf,
-                // TODO Adicionar o tal de NotAtomic
-                _ => TokenType.Atomic,
-            };
         }
     }
 }

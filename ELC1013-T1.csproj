@@ -15,12 +15,21 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>BinaryNode.tt</DependentUpon>
     </None>
+    <None Include="TokenType.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TokenType.tt</DependentUpon>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
     <None Update="BinaryNode.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>BinaryNode.cs</LastGenOutput>
+    </None>
+    <None Update="TokenType.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TokenType.cs</LastGenOutput>
     </None>
   </ItemGroup>
 
@@ -34,10 +43,20 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>BinaryNode.tt</DependentUpon>
     </Compile>
+    <Compile Update="Lexer.Token.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Lexer.Token.tt</DependentUpon>
+    </Compile>
     <Compile Update="Proposition2.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Proposition2.tt</DependentUpon>
+    </Compile>
+    <Compile Update="TokenType.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TokenType.tt</DependentUpon>
     </Compile>
   </ItemGroup>
 

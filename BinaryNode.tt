@@ -5,17 +5,19 @@
 namespace ELC1013_T1
 {
 <#
-	BinaryNode[] bns = {
-		new("And"     , " ^ "  , ""   , " e "            , (lhs, rhs) =>  $"{lhs} && {rhs}"),
-		new("Or"      , " V "  , ""   , " ou "           , (lhs, rhs) =>  $"{lhs} || {rhs}"),
-		new("IfThen"  , " -> " , "se ", ", então "       , (lhs, rhs) => $"!{lhs} || {rhs}"),
-		new("IfOnlyIf", " <-> ", "se ", ", e somente se ", (lhs, rhs) =>  $"{lhs} == {rhs}"),
-	};
+    BinaryNode[] bns = {
+        new("And"     , " ^ "  , ""   , " e "            , (lhs, rhs) =>  $"{lhs} && {rhs}"),
+        new("Or"      , " V "  , ""   , " ou "           , (lhs, rhs) =>  $"{lhs} || {rhs}"),
+        new("IfThen"  , " -> " , "se ", ", então "       , (lhs, rhs) => $"!{lhs} || {rhs}"),
+        new("IfOnlyIf", " <-> ", "se ", ", e somente se ", (lhs, rhs) =>  $"{lhs} == {rhs}"),
+    };
 
-	foreach (ref readonly BinaryNode bn in bns.AsSpan())
-	{#>
+    foreach (ref readonly BinaryNode bn in bns.AsSpan())
+    {#>
     public sealed class <#=bn.Name#>Node : BinaryNode
     {
+        public <#=bn.Name#>Node(PropositionNode rhs, PropositionNode lhs) : base(rhs, lhs) { }
+
         public override sealed bool Eval(ref readonly Evaluator context)
         {
             return <#=bn.Eval("leftNode.Eval(in context)", "rightNode.Eval(in context)")#>;
