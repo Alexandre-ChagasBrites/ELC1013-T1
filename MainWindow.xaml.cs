@@ -1,4 +1,8 @@
-﻿using System.Windows;
+﻿using ICSharpCode.AvalonEdit.AddIn;
+using ICSharpCode.SharpDevelop.Editor;
+using System.ComponentModel.Design;
+using System.Windows;
+using System.Windows.Media;
 
 namespace ELC1013_T1
 {
@@ -7,10 +11,22 @@ namespace ELC1013_T1
     /// </summary>
     public partial class MainWindow : Window
     {
+        private TextMarkerService textMarkerService;
+        private Color errorColor = Color.FromRgb(0xa3, 0x15, 0x15);
+
         public MainWindow()
         {
             InitializeComponent();
-            //0xa31515
+            InitializeTextMarkerService();
+        }
+
+        void InitializeTextMarkerService()
+        {
+            textMarkerService = new TextMarkerService(inputTextBox.Document);
+            inputTextBox.TextArea.TextView.BackgroundRenderers.Add(textMarkerService);
+            inputTextBox.TextArea.TextView.LineTransformers.Add(textMarkerService);
+            if (inputTextBox.Document.ServiceProvider.GetService(typeof(IServiceContainer)) is IServiceContainer services)
+                services.AddService(typeof(ITextMarkerService), textMarkerService);
         }
 
         private void InputTextBox_TextChanged(object sender, EventArgs e)
@@ -18,10 +34,16 @@ namespace ELC1013_T1
             Parser parser = new Parser(inputTextBox.Text);
             parser.Parse();
 
+            textMarkerService.RemoveAll(p => true);
+
             errorsTextBox.Inlines.Clear();
-            foreach (string error in parser.Errors)
+            foreach (Parser.Error error in parser.Errors)
             {
-                errorsTextBox.Inlines.Add(error);
+                ITextMarker marker = textMarkerService.Create(error.start, error.length);
+                marker.MarkerTypes = TextMarkerTypes.SquigglyUnderline;
+                marker.MarkerColor = errorColor;
+
+                errorsTextBox.Inlines.Add(error.message);
                 errorsTextBox.Inlines.Add(Environment.NewLine);
             }
 
