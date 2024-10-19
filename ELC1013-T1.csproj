@@ -5,8 +5,8 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <RootNamespace>ELC1013_T1</RootNamespace>
     <Nullable>enable</Nullable>
-    <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
   </PropertyGroup>
 
 </Project>
