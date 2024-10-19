@@ -1,13 +1,4 @@
-﻿using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using System.Windows;
 
 namespace ELC1013_T1
 {
@@ -19,12 +10,12 @@ namespace ELC1013_T1
         public MainWindow()
         {
             InitializeComponent();
+            //0xa31515
         }
 
-        private void InputTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void InputTextBox_TextChanged(object sender, EventArgs e)
         {
-            string src = inputTextBox.Text;// new TextRange(inputTextBox.Document.ContentStart, inputTextBox.Document.ContentEnd).Text;
-            Parser parser = new Parser(src);
+            Parser parser = new Parser(inputTextBox.Text);
             parser.Parse();
 
             errorsTextBox.Inlines.Clear();

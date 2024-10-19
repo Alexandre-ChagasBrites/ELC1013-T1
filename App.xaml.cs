@@ -1,7 +1,9 @@
-﻿using System.Configuration;
-using System.Data;
+﻿using ICSharpCode.AvalonEdit.Highlighting;
+using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Resources;
+using System.Xml;
 
 namespace ELC1013_T1
 {
@@ -12,6 +14,13 @@ namespace ELC1013_T1
     {
         public App()
         {
+            StreamResourceInfo pllResource = GetResourceStream(new Uri("PLL.xshd", UriKind.Relative));
+            using (XmlTextReader reader = new(pllResource.Stream))
+            {
+                IHighlightingDefinition highlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+                HighlightingManager.Instance.RegisterHighlighting("PLL", [], highlighting);
+            }
+
             string[] srcs =
             {
                 """

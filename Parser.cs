@@ -53,7 +53,8 @@ namespace ELC1013_T1
 
         private ArgumentException GenerateError(string message)
         {
-            return new ArgumentException($"Line {previousToken.line}: {message}");
+            System.Drawing.Point point = lexer.GetLineColumn(previousToken.start + previousToken.lexeme.Length);
+            return new ArgumentException($"Error [{point.Y},{point.X}]: {message}");
         }
 
         private void Consume(Lexer.TokenType type, string message)

@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ELC1013_T1"
+        xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
         mc:Ignorable="d"
         Title="Lógica Proposicional" Height="450" Width="800">
     <DockPanel LastChildFill="True">
@@ -30,7 +31,12 @@
                     </ScrollViewer>
                 </GroupBox>
                 <GroupBox Header="Entrada" Margin="8,8,4,4" BorderBrush="Black" BorderThickness="1">
-                    <TextBox x:Name="inputTextBox" AcceptsReturn="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" TextChanged="InputTextBox_TextChanged"/>
+                    <avalonEdit:TextEditor
+                        x:Name="inputTextBox" FontFamily="Consolas" FontSize="10pt"
+                        VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                        SyntaxHighlighting="PLL"
+                        TextChanged="InputTextBox_TextChanged"
+                        ShowLineNumbers="true"/>
                 </GroupBox>
             </DockPanel>
         </Border>
