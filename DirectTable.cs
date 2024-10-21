@@ -15,7 +15,7 @@ namespace ELC1013_T1
 
             Evaluator e = new() { truthyness = 0, atomics = atomics };
 
-            for (e.truthyness = 0; isValid && (e.truthyness < (1u << premises.Count)); e.truthyness++)
+            for (e.truthyness = 0; isValid && (e.truthyness < (1u << atomics.Count)); e.truthyness++)
             {
                 for (int j = 0; j < premises.Count - 1; j++)
                     if (premises[j].Eval(in e))
