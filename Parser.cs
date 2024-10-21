@@ -6,14 +6,21 @@ namespace ELC1013_T1
 {
     public partial class Parser
     {
-        private Lexer lexer;
+        public struct Error
+        {
+            public string message;
+            public int start;
+            public int length;
+        }
+
+        private readonly Lexer lexer;
         private Lexer.Token currentToken;
         private Lexer.Token previousToken;
-        private Stack<List<Node>> nodeStack;
+        private readonly Stack<List<Node>> nodeStack;
 
-        public List<PremiseNode> Premises;
-        public List<string> Atomics;
-        public List<string> Errors;
+        public List<PremiseNode> Premises {  get; private set; }
+        public List<string> Atomics { get; private set; }
+        public List<Error> Errors { get; private set; }
 
         public Parser(string src)
         {
@@ -23,7 +30,7 @@ namespace ELC1013_T1
             NextToken();
             Premises = new List<PremiseNode>();
             Atomics = new List<string>();
-            Errors = new List<string>();
+            Errors = new List<Error>();
         }
 
         private void NextToken()
@@ -51,9 +58,17 @@ namespace ELC1013_T1
             return false;
         }
 
-        private ArgumentException GenerateError(string message)
+        private ArgumentException GenerateError(string message, Lexer.Token token)
         {
-            return new ArgumentException($"Line {previousToken.line}: {message}");
+            System.Drawing.Point point = lexer.GetLineColumn(token.start + token.lexeme.Length);
+            Error error = new Error()
+            {
+                message = $"Error [{point.Y},{point.X}]: {message}",
+                start = token.start,
+                length = token.lexeme.Length
+            };
+            Errors.Add(error);
+            return new ArgumentException(error.message);
         }
 
         private void Consume(Lexer.TokenType type, string message)
@@ -63,7 +78,7 @@ namespace ELC1013_T1
                 NextToken();
                 return;
             }
-            throw GenerateError(message);
+            throw GenerateError(message, currentToken);
         }
 
         private void Consume(PropositionNode node, string message)
@@ -76,7 +91,7 @@ namespace ELC1013_T1
                 NextToken();
                 return;
             }
-            throw GenerateError(message);
+            throw GenerateError(message, currentToken);
         }
 
         public void Parse()
@@ -94,7 +109,6 @@ namespace ELC1013_T1
                 }
                 catch (Exception ex)
                 {
-                    Errors.Add(ex.Message);
                     do
                         NextToken();
                     while (currentToken.type != Lexer.TokenType.None && previousToken.type != Lexer.TokenType.End);

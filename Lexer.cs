@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Windows;
 
 namespace ELC1013_T1
 {
@@ -8,16 +10,12 @@ namespace ELC1013_T1
         public struct Token
         {
             public TokenType type;
+            public int start;
             public ReadOnlyMemory<char> lexeme;
-#if false
-            public string lexeme;
-#endif
-            public int line;
         }
 
-        private string src;
+        private readonly string src;
         private int index = 0;
-        private int line = 1;
 
         public Lexer(string src)
         {
@@ -27,7 +25,7 @@ namespace ELC1013_T1
         public Token ReadToken()
         {
             if (index >= src.Length)
-                return new Token() { type = TokenType.None, line = line };
+                return new Token() { type = TokenType.None, start = index, lexeme = src.AsMemory(index, 0) };
 
             TokenType type = TokenType.Text;
             int start = index;
@@ -36,7 +34,6 @@ namespace ELC1013_T1
             {
                 type = TokenType.End;
                 index++;
-                line++;
             }
             else if (src[index] == '}')
             {
@@ -67,7 +64,22 @@ namespace ELC1013_T1
                 }
             }
 
-            return new Token() { type = type, lexeme = src.AsMemory(start, index - start), line = line };
+            return new Token() { type = type, start = start, lexeme = src.AsMemory(start, index - start) };
+        }
+
+        public System.Drawing.Point GetLineColumn(int index)
+        {
+            int start = 0;
+            int line = 1;
+            for (int i = 0; i < index; i++)
+            {
+                if (src[i] == '\n')
+                {
+                    start = i + 1;
+                    line++;
+                }
+            }
+            return new System.Drawing.Point(index - start + 1, line);
         }
     }
 }

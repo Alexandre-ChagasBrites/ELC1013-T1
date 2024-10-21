@@ -1,3 +1,6 @@
+ï»¿using System.Diagnostics;
+using System.Xml.Linq;
+
 namespace ELC1013_T1
 {
     public abstract class Node
@@ -15,10 +18,22 @@ namespace ELC1013_T1
         }
     }
 
+    public enum PropositionPrecedence
+    {
+        None,
+        Atomic,
+        Not,
+        And,
+        Or,
+        IfThen,
+        IfOnlyIf
+    }
+
     public abstract class PropositionNode : Node, IEquatable<PropositionNode>
     {
         public List<Node> subnodes;
 
+        public abstract PropositionPrecedence Precedence();
         public abstract bool Eval(ref readonly Evaluator context);
 
         public override IEnumerable<ReadOnlyMemory<char>> Print()
@@ -33,19 +48,45 @@ namespace ELC1013_T1
         public abstract IEnumerable<ReadOnlyMemory<char>> PrintProposition();
         public abstract IEnumerable<ReadOnlyMemory<char>> PrintGuess();
         public abstract bool Equals(PropositionNode other);
+
+        protected IEnumerable<ReadOnlyMemory<char>> PrintWrapped(PropositionNode node)
+        {
+            if (Precedence() < node.Precedence())
+                yield return "(".AsMemory();
+            foreach (var x in node.PrintProposition())
+                yield return x;
+            if (Precedence() < node.Precedence())
+                yield return ")".AsMemory();
+        }
+
+        public static PropositionNode operator!(PropositionNode node)
+        {
+            return node is NotNode notNode ? notNode.node : new NotNode() { node = node };
+        }
+
+        public static PropositionNode operator &(PropositionNode leftNode, PropositionNode rightNode)
+        {
+            return new AndNode() { leftNode = leftNode, rightNode = rightNode };
+        }
+
+        public static PropositionNode operator |(PropositionNode leftNode, PropositionNode rightNode)
+        {
+            return new OrNode() { leftNode = leftNode, rightNode = rightNode };
+        }
     }
 
     public struct Evaluator()
     {
         internal ulong truthyness;
         internal List<string> atomics;
-        // TODO Deveria checar que há no máximo 63 ou 63 atômicos...
+        // TODO Deveria checar que hÃ¡ no mÃ¡ximo 63 ou 63 atÃ´micos...
     }
 
     public class PremiseNode : PropositionNode
     {
         public PropositionNode node;
 
+        public override PropositionPrecedence Precedence() => node.Precedence();
         public override sealed bool Eval(ref readonly Evaluator context) => node.Eval(in context);
 
         public override IEnumerable<ReadOnlyMemory<char>> PrintProposition()
@@ -70,10 +111,12 @@ namespace ELC1013_T1
     {
         /// <summary>
         /// DEVE continuar sendo <see langword="string"/>, por causa da
-        /// imutabilidade: a comparação por igualdade é em tempo constante (por
-        /// referência).
+        /// imutabilidade: a comparaÃ§Ã£o por igualdade Ã© em tempo constante (por
+        /// referÃªncia).
         /// </summary>
         public string name;
+
+        public override PropositionPrecedence Precedence() => PropositionPrecedence.Atomic;
 
         public override sealed bool Eval(ref readonly Evaluator context)
         {
@@ -101,19 +144,20 @@ namespace ELC1013_T1
         {
             node = pn;
         }
+        public override PropositionPrecedence Precedence() => PropositionPrecedence.Not;
 
         public override sealed bool Eval(ref readonly Evaluator context) => !node.Eval(in context);
 
         public override IEnumerable<ReadOnlyMemory<char>> PrintProposition()
         {
-            yield return "~".AsMemory();
-            foreach (var x in node.PrintProposition())
+            yield return "Â¬".AsMemory();
+            foreach (var x in PrintWrapped(node))
                 yield return x;
         }
 
         public override IEnumerable<ReadOnlyMemory<char>> PrintGuess()
         {
-            yield return "não é verdade que ".AsMemory();
+            yield return "nÃ£o Ã© verdade que ".AsMemory();
             foreach (var x in node.PrintGuess())
                 yield return x;
         }
@@ -141,11 +185,10 @@ namespace ELC1013_T1
 
         public override sealed IEnumerable<ReadOnlyMemory<char>> PrintProposition()
         {
-            foreach (var x in leftNode.PrintProposition())
+            foreach (var x in PrintWrapped(leftNode))
                 yield return x;
-            leftNode.PrintProposition();
             yield return PropositionOperator;
-            foreach (var x in rightNode.PrintProposition())
+            foreach (var x in PrintWrapped(rightNode))
                 yield return x;
         }
 

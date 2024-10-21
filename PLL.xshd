@@ -1,0 +1,23 @@
+<SyntaxDefinition name="PLL" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+    <Color name="Text" foreground="#000000"/>
+    <Color name="Operator" foreground="#066555"/>
+    <Color name="Atomic" foreground="#066555"/>
+    <Color name="Keyword" foreground="#0000ff"/>
+    <RuleSet>
+        <Keywords color="Keyword">
+            <Word>not</Word>
+            <Word>ifthen</Word>
+            <Word>thenif</Word>
+            <Word>and</Word>
+            <Word>or</Word>
+            <Word>ifonlyif</Word>
+        </Keywords>
+        <Keywords color="Operator">
+            <Word>{</Word>
+            <Word>}</Word>
+        </Keywords>
+        <Rule color="Atomic">
+            \w+{
+        </Rule>
+    </RuleSet>
+</SyntaxDefinition>
