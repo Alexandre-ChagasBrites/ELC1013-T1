@@ -11,6 +11,7 @@
         <GroupBox Header="Resultados" Width="240" Margin="4,8,8,8" BorderBrush="Black" BorderThickness="1" DockPanel.Dock="Right">
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                 <StackPanel Orientation="Vertical">
+                    <TextBlock x:Name="resultTextBox"/>
                     <Expander Header="Atômicos" IsExpanded="True">
                         <TextBlock x:Name="atomicsTextBox"/>
                     </Expander>

@@ -8,115 +8,114 @@ namespace ELC1013_T1
 {
     public class Inferencer
     {
-        public List<PropositionNode> Propositions;
+        private readonly List<PropositionNode> premisses;
 
-        public Inferencer()
+        public List<PropositionNode> Inferred { get; private set; }
+
+        public IEnumerable<PropositionNode> Propositions
         {
-            Propositions = new List<PropositionNode>();
+            get
+            {
+                foreach (PropositionNode proposition in premisses)
+                    yield return proposition;
+                foreach (PropositionNode proposition in Inferred)
+                    yield return proposition;
+            }
         }
 
-        public void Infer(PropositionNode premise)
+        public Inferencer(IEnumerable<PropositionNode> premisses)
         {
-            if (Propositions.Contains(premise))
-                return;
-
-            List<PropositionNode> inferred = GetRules(premise).ToList();
-            Propositions.Add(premise);
-
-            foreach (PropositionNode proposition in inferred)
-                Infer(proposition);
+            this.premisses = premisses.ToList();
+            Inferred = new List<PropositionNode>();
         }
 
-        private IEnumerable<PropositionNode> GetRules(PropositionNode premise)
+        public void Infer()
         {
-            foreach (PropositionNode modusPonens in ModusPonens(premise))
+            bool shouldStop = false;
+            while (!shouldStop)
+            {
+                shouldStop = true;
+                foreach (PropositionNode inferred in GetRules().ToList())
+                {
+                    if (!Inferred.Contains(inferred))
+                    {
+                        Inferred.Add(inferred);
+                        shouldStop = false;
+                    }
+                }
+            }
+        }
+
+        private IEnumerable<PropositionNode> GetRules()
+        {
+            foreach (PropositionNode modusPonens in ModusPonens())
                 yield return modusPonens;
 
-            foreach (PropositionNode modusTollens in ModusTollens(premise))
+            foreach (PropositionNode modusTollens in ModusTollens())
                 yield return modusTollens;
 
-            foreach (PropositionNode silogismoHipotetico in SilogismoHipotetico(premise))
+            foreach (PropositionNode silogismoHipotetico in SilogismoHipotetico())
                 yield return silogismoHipotetico;
 
-            foreach (PropositionNode silogismoDisjuntivo in SilogismoDisjuntivo(premise))
+            foreach (PropositionNode silogismoDisjuntivo in SilogismoDisjuntivo())
                 yield return silogismoDisjuntivo;
         }
 
-        private IEnumerable<PropositionNode> ModusPonens(PropositionNode anyNode)
+        private IEnumerable<PropositionNode> ModusPonens()
         {
-            foreach (PropositionNode conclusion in Propositions.OfType<IfThenNode>()
-                .Where(ifthenNode => ifthenNode.leftNode.Equals(anyNode))
+            var ifthenNodes = Propositions.OfType<IfThenNode>();
+            foreach (PropositionNode conclusion in ifthenNodes
+                .Where(ifthenNode => IsValid(ifthenNode.leftNode))
                 .Select(ifthenNode => ifthenNode.rightNode))
                 yield return conclusion;
-            if (anyNode is IfThenNode ifthenNode)
-            {
-                foreach (PropositionNode conclusion in Propositions
-                 .Where(anyNode => ifthenNode.leftNode.Equals(anyNode))
-                 .Select(anyNode => ifthenNode.rightNode))
-                 yield return conclusion;
-            }
         }
 
-        private IEnumerable<PropositionNode> ModusTollens(PropositionNode anyNode)
+        private IEnumerable<PropositionNode> ModusTollens()
         {
-            if (anyNode is IfThenNode ifthenNode)
-            {
-                foreach (PropositionNode conclusion in Propositions.OfType<NotNode>()
-                    .Where(notNode => ifthenNode.rightNode.Equals(notNode.node))
-                    .Select(_ => ifthenNode.rightNode))
-                    yield return conclusion;
-            }
-            if (anyNode is NotNode notNode)
-            {
-                foreach (PropositionNode conclusion in Propositions.OfType<IfThenNode>()
-                    .Where(ifthenNode => ifthenNode.rightNode.Equals(notNode.node))
-                    .Select(ifthenNode => new NotNode() { node = ifthenNode.leftNode }))
-                    yield return conclusion;
-            }
+            var ifthenNodes = Propositions.OfType<IfThenNode>();
+            foreach (PropositionNode conclusion in ifthenNodes
+                .Where(ifthenNode => IsValid(!ifthenNode.rightNode))
+                .Select(ifthenNode => !ifthenNode.leftNode))
+                yield return conclusion;
         }
 
-        private IEnumerable<PropositionNode> SilogismoHipotetico(PropositionNode anyNode)
+        private IEnumerable<PropositionNode> SilogismoHipotetico()
         {
-            if (anyNode is IfThenNode leftNode)
+            var ifthenNodes = Propositions.OfType<IfThenNode>();
+            foreach (IfThenNode leftNode in ifthenNodes)
             {
-                foreach (PropositionNode conclusion in Propositions.OfType<IfThenNode>()
+                foreach (PropositionNode conclusion in ifthenNodes
                     .Where(rightNode => leftNode.rightNode.Equals(rightNode.leftNode))
                     .Select(rightNode => new IfThenNode() { leftNode = leftNode.leftNode, rightNode = rightNode.rightNode }))
                     yield return conclusion;
             }
-            if (anyNode is IfThenNode rightNode)
-            {
-                foreach (PropositionNode conclusion in Propositions.OfType<IfThenNode>()
-                    .Where(leftNode => leftNode.rightNode.Equals(rightNode.leftNode))
-                    .Select(leftNode => new IfThenNode() { leftNode = leftNode.leftNode, rightNode = rightNode.rightNode }))
-                    yield return conclusion;
-            }
         }
 
-        private IEnumerable<PropositionNode> SilogismoDisjuntivo(PropositionNode anyNode)
+        private IEnumerable<PropositionNode> SilogismoDisjuntivo()
         {
-            if (anyNode is OrNode orNode)
+            var orNodes = Propositions.OfType<OrNode>();
+            foreach (PropositionNode conclusion in orNodes
+                .Where(orNode => IsValid(!orNode.leftNode))
+                .Select(orNode => orNode.rightNode))
+                yield return conclusion;
+            foreach (PropositionNode conclusion in orNodes
+                .Where(orNode => IsValid(!orNode.rightNode))
+                .Select(orNode => orNode.leftNode))
+                yield return conclusion;
+        }
+
+        private bool IsValid(PropositionNode anyNode)
+        {
+            if (Propositions.Contains(anyNode))
+                return true;
+            if (anyNode is AndNode andNode)
+                return IsValid(andNode.leftNode) && IsValid(andNode.rightNode);
+            foreach (AndNode andPropositions in Propositions.OfType<AndNode>())
             {
-                foreach (PropositionNode conclusion in Propositions.OfType<NotNode>()
-                    .Where(notNode => orNode.leftNode.Equals(notNode.node))
-                    .Select(_ => new NotNode() { node = orNode.rightNode }))
-                    yield return conclusion;
-                foreach (PropositionNode conclusion in Propositions.OfType<NotNode>()
-                    .Where(notNode => orNode.rightNode.Equals(notNode.node))
-                    .Select(_ => new NotNode() { node = orNode.leftNode }))
-                    yield return conclusion;
+                if (anyNode.Equals(andPropositions.leftNode) || anyNode.Equals(andPropositions.rightNode))
+                    return true;
             }
-            if (anyNode is NotNode notNode)
-            {
-                foreach (PropositionNode conclusion in Propositions.OfType<OrNode>()
-                    .Where(orNode => orNode.leftNode.Equals(notNode.node))
-                    .Select(orNode => new NotNode() { node = orNode.rightNode }))
-                    yield return conclusion;
-                foreach (PropositionNode conclusion in Propositions.OfType<OrNode>()
-                    .Where(orNode => orNode.rightNode.Equals(notNode.node))
-                    .Select(orNode => new NotNode() { node = orNode.leftNode }))
-                    yield return conclusion;
-            }
+            return false;
         }
     }
 }

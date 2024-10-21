@@ -13,14 +13,14 @@ namespace ELC1013_T1
             public int length;
         }
 
-        private Lexer lexer;
+        private readonly Lexer lexer;
         private Lexer.Token currentToken;
         private Lexer.Token previousToken;
-        private Stack<List<Node>> nodeStack;
+        private readonly Stack<List<Node>> nodeStack;
 
-        public List<PremiseNode> Premises;
-        public List<string> Atomics;
-        public List<Error> Errors;
+        public List<PremiseNode> Premises {  get; private set; }
+        public List<string> Atomics { get; private set; }
+        public List<Error> Errors { get; private set; }
 
         public Parser(string src)
         {

@@ -35,6 +35,11 @@ namespace ELC1013_T1
         public abstract IEnumerable<ReadOnlyMemory<char>> PrintProposition();
         public abstract IEnumerable<ReadOnlyMemory<char>> PrintGuess();
         public abstract bool Equals(PropositionNode other);
+
+        public static PropositionNode operator!(PropositionNode proposition)
+        {
+            return proposition is NotNode notNode ? notNode.node : new NotNode() { node = proposition };
+        }
     }
 
     public struct Evaluator()

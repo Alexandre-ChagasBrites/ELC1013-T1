@@ -30,7 +30,7 @@ namespace ELC1013_T1
             public ReadOnlyMemory<char> lexeme;
         }
 
-        private string src;
+        private readonly string src;
         private int index = 0;
 
         public Lexer(string src)

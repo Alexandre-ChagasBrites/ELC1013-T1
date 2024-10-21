@@ -34,6 +34,8 @@ namespace ELC1013_T1
             Parser parser = new Parser(inputTextBox.Text);
             parser.Parse();
 
+            resultTextBox.Text = DirectTable.IsValid(parser.Atomics, parser.Premises) ? "Válido" : "Inválido";
+
             textMarkerService.RemoveAll(p => true);
 
             errorsTextBox.Inlines.Clear();
@@ -63,19 +65,19 @@ namespace ELC1013_T1
                 premissesTextBox.Inlines.Add(Environment.NewLine);
             }
 
-            Inferencer inferencer = new Inferencer();
-            foreach (PremiseNode node in parser.Premises)
-            {
-                inferencer.Infer(node.node);
-            }
+            var premisses = parser.Premises
+                .Select(premisse => premisse.node)
+                .SkipLast(1);
+            Inferencer inferencer = new Inferencer(premisses);
+            inferencer.Infer();
 
             inferredTextBox.Inlines.Clear();
-            for (int i = 0; i < inferencer.Propositions.Count; i++)
+            for (int i = 0; i < inferencer.Inferred.Count; i++)
             {
                 inferredTextBox.Inlines.Add($"{i + 1}. ");
-                inferredTextBox.Inlines.Add(string.Join(string.Empty, inferencer.Propositions[i].PrintProposition()));
+                inferredTextBox.Inlines.Add(string.Join(string.Empty, inferencer.Inferred[i].PrintProposition()));
                 inferredTextBox.Inlines.Add(" | ");
-                inferredTextBox.Inlines.Add(string.Join(string.Empty, inferencer.Propositions[i].PrintGuess()));
+                inferredTextBox.Inlines.Add(string.Join(string.Empty, inferencer.Inferred[i].PrintGuess()));
                 inferredTextBox.Inlines.Add(Environment.NewLine);
             }
         }
