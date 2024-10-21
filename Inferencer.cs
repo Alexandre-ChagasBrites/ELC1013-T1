@@ -59,6 +59,9 @@ namespace ELC1013_T1
 
             foreach (PropositionNode silogismoDisjuntivo in SilogismoDisjuntivo())
                 yield return silogismoDisjuntivo;
+
+            foreach (PropositionNode deMorgan in DeMorgan())
+                yield return deMorgan;
         }
 
         private IEnumerable<PropositionNode> ModusPonens()
@@ -104,12 +107,27 @@ namespace ELC1013_T1
                 yield return conclusion;
         }
 
+        private IEnumerable<PropositionNode> DeMorgan()
+        {
+            var notNodes = Propositions.OfType<NotNode>();
+            foreach (PropositionNode anyNode in notNodes
+                .Select(notNode => notNode.node))
+            {
+                if (anyNode is AndNode andNode)
+                    yield return !andNode.leftNode | !andNode.rightNode;
+                else if (anyNode is OrNode orNode)
+                    yield return !orNode.leftNode & !orNode.rightNode;
+            }
+        }
+
         private bool IsValid(PropositionNode anyNode)
         {
             if (Propositions.Contains(anyNode))
                 return true;
             if (anyNode is AndNode andNode)
                 return IsValid(andNode.leftNode) && IsValid(andNode.rightNode);
+            if (anyNode is OrNode orNode)
+                return IsValid(orNode.leftNode) || IsValid(orNode.rightNode);
             foreach (AndNode andPropositions in Propositions.OfType<AndNode>())
             {
                 if (anyNode.Equals(andPropositions.leftNode) || anyNode.Equals(andPropositions.rightNode))

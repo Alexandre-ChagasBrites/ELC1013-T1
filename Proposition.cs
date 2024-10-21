@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Xml.Linq;
 
 namespace ELC1013_T1
 {
@@ -17,10 +18,22 @@ namespace ELC1013_T1
         }
     }
 
+    public enum PropositionPrecedence
+    {
+        None,
+        Atomic,
+        Not,
+        And,
+        Or,
+        IfThen,
+        IfOnlyIf
+    }
+
     public abstract class PropositionNode : Node, IEquatable<PropositionNode>
     {
         public List<Node> subnodes;
 
+        public abstract PropositionPrecedence Precedence();
         public abstract bool Eval(ref readonly Evaluator context);
 
         public override IEnumerable<ReadOnlyMemory<char>> Print()
@@ -36,9 +49,29 @@ namespace ELC1013_T1
         public abstract IEnumerable<ReadOnlyMemory<char>> PrintGuess();
         public abstract bool Equals(PropositionNode other);
 
-        public static PropositionNode operator!(PropositionNode proposition)
+        protected IEnumerable<ReadOnlyMemory<char>> PrintWrapped(PropositionNode node)
         {
-            return proposition is NotNode notNode ? notNode.node : new NotNode() { node = proposition };
+            if (Precedence() < node.Precedence())
+                yield return "(".AsMemory();
+            foreach (var x in node.PrintProposition())
+                yield return x;
+            if (Precedence() < node.Precedence())
+                yield return ")".AsMemory();
+        }
+
+        public static PropositionNode operator!(PropositionNode node)
+        {
+            return node is NotNode notNode ? notNode.node : new NotNode() { node = node };
+        }
+
+        public static PropositionNode operator &(PropositionNode leftNode, PropositionNode rightNode)
+        {
+            return new AndNode() { leftNode = leftNode, rightNode = rightNode };
+        }
+
+        public static PropositionNode operator |(PropositionNode leftNode, PropositionNode rightNode)
+        {
+            return new OrNode() { leftNode = leftNode, rightNode = rightNode };
         }
     }
 
@@ -53,6 +86,7 @@ namespace ELC1013_T1
     {
         public PropositionNode node;
 
+        public override PropositionPrecedence Precedence() => node.Precedence();
         public override sealed bool Eval(ref readonly Evaluator context) => node.Eval(in context);
 
         public override IEnumerable<ReadOnlyMemory<char>> PrintProposition()
@@ -82,6 +116,8 @@ namespace ELC1013_T1
         /// </summary>
         public string name;
 
+        public override PropositionPrecedence Precedence() => PropositionPrecedence.Atomic;
+
         public override sealed bool Eval(ref readonly Evaluator context)
         {
               return 1u == ((context.truthyness >> context.atomics.IndexOf(name)) & 1u);
@@ -104,12 +140,13 @@ namespace ELC1013_T1
     {
         public PropositionNode node;
 
+        public override PropositionPrecedence Precedence() => PropositionPrecedence.Not;
         public override sealed bool Eval(ref readonly Evaluator context) => !node.Eval(in context);
 
         public override IEnumerable<ReadOnlyMemory<char>> PrintProposition()
         {
             yield return "~".AsMemory();
-            foreach (var x in node.PrintProposition())
+            foreach (var x in PrintWrapped(node))
                 yield return x;
         }
 
@@ -137,11 +174,10 @@ namespace ELC1013_T1
 
         public override sealed IEnumerable<ReadOnlyMemory<char>> PrintProposition()
         {
-            foreach (var x in leftNode.PrintProposition())
+            foreach (var x in PrintWrapped(leftNode))
                 yield return x;
-            leftNode.PrintProposition();
             yield return PropositionOperator;
-            foreach (var x in rightNode.PrintProposition())
+            foreach (var x in PrintWrapped(rightNode))
                 yield return x;
         }
 
@@ -163,6 +199,8 @@ namespace ELC1013_T1
 
     public sealed class AndNode : BinaryNode
     {
+        public override PropositionPrecedence Precedence() => PropositionPrecedence.And;
+
         public override sealed bool Eval(ref readonly Evaluator context)
         {
             return leftNode.Eval(in context) && rightNode.Eval(in context);
@@ -180,6 +218,8 @@ namespace ELC1013_T1
 
     public sealed class OrNode : BinaryNode
     {
+        public override PropositionPrecedence Precedence() => PropositionPrecedence.Or;
+
         public override sealed bool Eval(ref readonly Evaluator context)
         {
             return leftNode.Eval(in context) || rightNode.Eval(in context);
@@ -196,6 +236,8 @@ namespace ELC1013_T1
     }
     public sealed class IfThenNode : BinaryNode
     {
+        public override PropositionPrecedence Precedence() => PropositionPrecedence.IfThen;
+
         public override sealed bool Eval(ref readonly Evaluator context)
         {
             return !leftNode.Eval(in context) || rightNode.Eval(in context);
@@ -212,6 +254,8 @@ namespace ELC1013_T1
     }
     public sealed class IfOnlyIfNode : BinaryNode
     {
+        public override PropositionPrecedence Precedence() => PropositionPrecedence.IfOnlyIf;
+
         public override sealed bool Eval(ref readonly Evaluator context)
         {
             return leftNode.Eval(in context) == rightNode.Eval(in context);

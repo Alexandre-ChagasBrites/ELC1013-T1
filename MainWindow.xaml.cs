@@ -34,7 +34,9 @@ namespace ELC1013_T1
             Parser parser = new Parser(inputTextBox.Text);
             parser.Parse();
 
-            resultTextBox.Text = DirectTable.IsValid(parser.Atomics, parser.Premises) ? "Válido" : "Inválido";
+            resultTextBox.Text = string.Empty;
+            if (parser.Atomics.Count > 0 && parser.Premises.Count > 0)
+                resultTextBox.Text = DirectTable.IsValid(parser.Atomics, parser.Premises) ? "Válido" : "Inválido";
 
             textMarkerService.RemoveAll(p => true);
 
