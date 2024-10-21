@@ -4,6 +4,8 @@
     {
         public AndNode(PropositionNode rhs, PropositionNode lhs) : base(rhs, lhs) { }
 
+		public override PropositionPrecedence Precedence() => PropositionPrecedence.And;
+
         public override sealed bool Eval(ref readonly Evaluator context)
         {
             return leftNode.Eval(in context) && rightNode.Eval(in context);
@@ -21,6 +23,8 @@
     public sealed class OrNode : BinaryNode
     {
         public OrNode(PropositionNode rhs, PropositionNode lhs) : base(rhs, lhs) { }
+
+		public override PropositionPrecedence Precedence() => PropositionPrecedence.Or;
 
         public override sealed bool Eval(ref readonly Evaluator context)
         {
@@ -40,6 +44,8 @@
     {
         public IfThenNode(PropositionNode rhs, PropositionNode lhs) : base(rhs, lhs) { }
 
+		public override PropositionPrecedence Precedence() => PropositionPrecedence.IfThen;
+
         public override sealed bool Eval(ref readonly Evaluator context)
         {
             return !leftNode.Eval(in context) || rightNode.Eval(in context);
@@ -57,6 +63,8 @@
     public sealed class IfOnlyIfNode : BinaryNode
     {
         public IfOnlyIfNode(PropositionNode rhs, PropositionNode lhs) : base(rhs, lhs) { }
+
+		public override PropositionPrecedence Precedence() => PropositionPrecedence.IfOnlyIf;
 
         public override sealed bool Eval(ref readonly Evaluator context)
         {

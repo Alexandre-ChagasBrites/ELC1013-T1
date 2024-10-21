@@ -61,17 +61,17 @@ namespace ELC1013_T1
 
         public static PropositionNode operator!(PropositionNode node)
         {
-            return node is NotNode notNode ? notNode.node : new NotNode() { node = node };
+            return node is NotNode notNode ? notNode.node : new NotNode(node);
         }
 
         public static PropositionNode operator &(PropositionNode leftNode, PropositionNode rightNode)
         {
-            return new AndNode() { leftNode = leftNode, rightNode = rightNode };
+            return new AndNode(leftNode, rightNode);
         }
 
         public static PropositionNode operator |(PropositionNode leftNode, PropositionNode rightNode)
         {
-            return new OrNode() { leftNode = leftNode, rightNode = rightNode };
+            return new OrNode(leftNode, rightNode);
         }
     }
 

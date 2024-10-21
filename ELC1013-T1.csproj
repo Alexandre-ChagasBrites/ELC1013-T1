@@ -21,4 +21,32 @@
     <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="BinaryNode.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>BinaryNode.cs</LastGenOutput>
+    </None>
+    <None Update="TokenType.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TokenType.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="BinaryNode.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>BinaryNode.tt</DependentUpon>
+    </Compile>
+    <Compile Update="TokenType.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TokenType.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
 </Project>

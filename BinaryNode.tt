@@ -18,6 +18,8 @@ namespace ELC1013_T1
     {
         public <#=bn.Name#>Node(PropositionNode rhs, PropositionNode lhs) : base(rhs, lhs) { }
 
+		public override PropositionPrecedence Precedence() => PropositionPrecedence.<#=bn.Name#>;
+
         public override sealed bool Eval(ref readonly Evaluator context)
         {
             return <#=bn.Eval("leftNode.Eval(in context)", "rightNode.Eval(in context)")#>;

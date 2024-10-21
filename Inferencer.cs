@@ -89,7 +89,7 @@ namespace ELC1013_T1
             {
                 foreach (PropositionNode conclusion in ifthenNodes
                     .Where(rightNode => leftNode.rightNode.Equals(rightNode.leftNode))
-                    .Select(rightNode => new IfThenNode() { leftNode = leftNode.leftNode, rightNode = rightNode.rightNode }))
+                    .Select(rightNode => new IfThenNode(leftNode.leftNode, rightNode.rightNode)))
                     yield return conclusion;
             }
         }

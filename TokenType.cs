@@ -87,7 +87,7 @@
                 Consume(result, "Expected '}' after left and right proposition(s)");
             }
             else
-                throw GenerateError("Expected proposition");
+                throw GenerateError("Expected proposition", currentToken);
             return result;
         }
     }
