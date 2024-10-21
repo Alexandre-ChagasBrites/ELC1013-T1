@@ -18,7 +18,7 @@ namespace ELC1013_T1
             for (e.truthyness = 0; isValid && (e.truthyness < (1u << atomics.Count)); e.truthyness++)
             {
                 for (int j = 0; j < premises.Count - 1; j++)
-                    if (premises[j].Eval(in e))
+                    if (!premises[j].Eval(in e))
                         goto Skip;
 
                 isValid = premises[premises.Count - 1].Eval(in e);
