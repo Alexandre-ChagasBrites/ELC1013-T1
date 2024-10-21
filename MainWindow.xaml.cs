@@ -64,6 +64,8 @@ namespace ELC1013_T1
             {
                 premissesTextBox.Inlines.Add($"{i + 1}. ");
                 premissesTextBox.Inlines.Add(string.Join(string.Empty, parser.Premises[i].PrintProposition()));
+                premissesTextBox.Inlines.Add(" | ");
+                premissesTextBox.Inlines.Add(string.Join(string.Empty, parser.Premises[i].Print()));
                 premissesTextBox.Inlines.Add(Environment.NewLine);
             }
 

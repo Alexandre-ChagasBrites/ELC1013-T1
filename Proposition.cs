@@ -1,4 +1,4 @@
-using System.Diagnostics;
+ï»¿using System.Diagnostics;
 using System.Xml.Linq;
 
 namespace ELC1013_T1
@@ -79,7 +79,7 @@ namespace ELC1013_T1
     {
         internal ulong truthyness;
         internal List<string> atomics;
-        // TODO Deveria checar que há no máximo 63 ou 63 atômicos...
+        // TODO Deveria checar que hÃ¡ no mÃ¡ximo 63 ou 63 atÃ´micos...
     }
 
     public class PremiseNode : PropositionNode
@@ -111,8 +111,8 @@ namespace ELC1013_T1
     {
         /// <summary>
         /// DEVE continuar sendo <see langword="string"/>, por causa da
-        /// imutabilidade: a comparação por igualdade é em tempo constante (por
-        /// referência).
+        /// imutabilidade: a comparaÃ§Ã£o por igualdade Ã© em tempo constante (por
+        /// referÃªncia).
         /// </summary>
         public string name;
 
@@ -145,14 +145,14 @@ namespace ELC1013_T1
 
         public override IEnumerable<ReadOnlyMemory<char>> PrintProposition()
         {
-            yield return "~".AsMemory();
+            yield return "Â¬".AsMemory();
             foreach (var x in PrintWrapped(node))
                 yield return x;
         }
 
         public override IEnumerable<ReadOnlyMemory<char>> PrintGuess()
         {
-            yield return "não é verdade que ".AsMemory();
+            yield return "nÃ£o Ã© verdade que ".AsMemory();
             foreach (var x in node.PrintGuess())
                 yield return x;
         }
@@ -206,7 +206,7 @@ namespace ELC1013_T1
             return leftNode.Eval(in context) && rightNode.Eval(in context);
         }
 
-        public override ReadOnlyMemory<char> PropositionOperator => " ^ ".AsMemory();
+        public override ReadOnlyMemory<char> PropositionOperator => " âˆ§ ".AsMemory();
         public override ReadOnlyMemory<char> GuessBefore => "".AsMemory();
         public override ReadOnlyMemory<char> GuessMiddle => " e ".AsMemory();
 
@@ -225,7 +225,7 @@ namespace ELC1013_T1
             return leftNode.Eval(in context) || rightNode.Eval(in context);
         }
 
-        public override ReadOnlyMemory<char> PropositionOperator => " V ".AsMemory();
+        public override ReadOnlyMemory<char> PropositionOperator => " âˆ¨ ".AsMemory();
         public override ReadOnlyMemory<char> GuessBefore => "".AsMemory();
         public override ReadOnlyMemory<char> GuessMiddle => " ou ".AsMemory();
 
@@ -243,9 +243,9 @@ namespace ELC1013_T1
             return !leftNode.Eval(in context) || rightNode.Eval(in context);
         }
 
-        public override ReadOnlyMemory<char> PropositionOperator => " -> ".AsMemory();
+        public override ReadOnlyMemory<char> PropositionOperator => " â†’ ".AsMemory();
         public override ReadOnlyMemory<char> GuessBefore => "se ".AsMemory();
-        public override ReadOnlyMemory<char> GuessMiddle => ", então ".AsMemory();
+        public override ReadOnlyMemory<char> GuessMiddle => ", entÃ£o ".AsMemory();
 
         public override bool Equals(PropositionNode other)
         {
@@ -261,7 +261,7 @@ namespace ELC1013_T1
             return leftNode.Eval(in context) == rightNode.Eval(in context);
         }
 
-        public override ReadOnlyMemory<char> PropositionOperator => " <-> ".AsMemory();
+        public override ReadOnlyMemory<char> PropositionOperator => " âŸ· ".AsMemory();
         public override ReadOnlyMemory<char> GuessBefore => "se ".AsMemory();
         public override ReadOnlyMemory<char> GuessMiddle => ", e somente se ".AsMemory();
 
