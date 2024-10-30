@@ -27,3 +27,13 @@ ifthen{Se t{a audiência é alta}, u{a propaganda é cara}}.
 O programa, and{q{passa no horário nobre}, mas not{u{a propaganda é barata}}}.
 Logo, o público not{não s{gosta do programa}}.
 ```
+
+```
+ifthen{Se p{os meus óculos estão na mesa da cozinha} então q{eu os vi no café da manhã}};
+or{r{Eu estava lendo o jornal na sala de estar} ou s{eu estava lendo o jornal na cozinha}};
+ifthen{Se r{eu estava lendo o jornal na sala de estar} então t{meus óculos estão na mesa do café}};
+not{Eu não q{vi meus óculos no café da manhã}};
+ifthen{Se u{eu estava lendo um livro na cama} então v{meus óculos estão na mesa de cabeceira}};
+ifthen{Se s{eu estava lendo o jornal na cozinha} então p{meus óculos estão na mesa da cozinha}};
+not{t{}}
+```
